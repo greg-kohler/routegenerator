@@ -31,7 +31,7 @@
         height: 90%;
         margin-left: 10%;
       }
-      .navbar {
+      .header-bar {
         height: 3em;
         overflow: hidden;
         background-color: #2C5530;
@@ -39,20 +39,24 @@
         position: fixed;
         top: 0; 
         width: 100%;
+        display: flex;
+        align-items: center;
+        font-family: Arial;
+        
       }
       .right-div {
         float: right;
       }
+      
+      h1 {
+      margin-left: 0.5em;
+      }
+      
     </style>
   </head>
   <body>
-    <div class="navbar">
-      <div>
+    <div class="header-bar">
       <h1>Pedestrian Route Generator</h1>
-      </div>
-      <div class="right-div">
-      <a href="#home">Greg Kohler</a>
-      </div>
     </div>
     <div class="map-container">
       <div id="map"></div>
@@ -67,10 +71,9 @@
       });
 
     map.on('click', (e) => {
-    // e.coord contains the longitude and latitude of the clicked point
     const startcoord = e.coord;
     console.log(`Map clicked at: ${startcoord.lng}, ${startcoord.lat}`);
-    addMarker(startcoord); // Call a function to add the marker
+    addMarker(startcoord);
     });
     function addMarker(coord) {
     new mapboxgl.Marker()
