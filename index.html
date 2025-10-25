@@ -21,11 +21,17 @@
         bottom: 0;
         width: 100%;
       }
+      #map-container {
+        width: 100%,
+        height: 80%;
+      }
     </style>
   </head>
   <body>
     <h3>Welcome to the Route Generator</h3>
-    <div id="map"></div>
+    <div id="map-container">
+      <div id="map"></div>
+    </div>
     <script>
       mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZ2Frb2hsZXIiLCJhIjoiY21oNmNteHM3MGlueDJrcTJnYnhrNG1hdSJ9.Jms57i-_QvRWoquaAuy-1A';
       const map = new mapboxgl.Map({
