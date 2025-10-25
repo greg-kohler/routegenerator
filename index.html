@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Museum Map</title>
+    <title>Route Generator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.js"></script>
     <link
@@ -24,6 +24,7 @@
     </style>
   </head>
   <body>
+    <div><h3>Welcome to the Route Generator</h3></div>
     <div id="map"></div>
     <script>
       mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZ2Frb2hsZXIiLCJhIjoiY21oNmNteHM3MGlueDJrcTJnYnhrNG1hdSJ9.Jms57i-_QvRWoquaAuy-1A';
@@ -35,14 +36,14 @@
       });
 
     map.on('click', (e) => {
-    // e.lngLat contains the longitude and latitude of the clicked point
-    const clickedLngLat = e.lngLat;
-    console.log(`Map clicked at: ${clickedLngLat.lng}, ${clickedLngLat.lat}`);
-    addMarker(clickedLngLat); // Call a function to add the marker
+    // e.coord contains the longitude and latitude of the clicked point
+    const startcoord = e.coord;
+    console.log(`Map clicked at: ${startcoord.lng}, ${startcoord.lat}`);
+    addMarker(startcoord); // Call a function to add the marker
     });
-    function addMarker(lngLat) {
+    function addMarker(coord) {
     new mapboxgl.Marker()
-        .setLngLat(lngLat)
+        .setcoord(coord)
         .addTo(map);
 }
 
