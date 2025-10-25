@@ -9,6 +9,9 @@
       href="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.css"
       rel="stylesheet"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?			family=TikTok+Sans:opsz,wght@12..36,300..900&display=swap" rel="stylesheet">
     <style>
       html {
         height: 100%;
@@ -19,6 +22,7 @@
         width: 100%;
         margin: 0;
         padding: 0;
+        font-family: "TikTok Sans", sans-serif;
       }
 
       #map {
@@ -26,13 +30,13 @@
         height: 100%;
       }
       .map-container {
-        margin-top: 3em;
-        width: 90%;
-        height: 90%;
-        margin-left: 10%;
+        margin-top: 5%;
+        width: 100%;
+        height: 70%;
+        z-index: 1;
       }
       .header-bar {
-        height: 3em;
+        height: 5vw;
         overflow: hidden;
         background-color: #2C5530;
         color: white;
@@ -41,15 +45,28 @@
         width: 100%;
         display: flex;
         align-items: center;
-        font-family: Arial;
-        
+        z-index: 2;
       }
-      .right-div {
-        float: right;
+      .lower-bar {
+      height: 30%;
+      background-color: #D38B5D;
+      color: white;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       }
       
       h1 {
       margin-left: 0.5em;
+      font-size: 4vw;
+      }
+      
+      .text-entry {
+      width: 90%;
+      height: 90%;
+      margin: 0 auto;
       }
       
     </style>
@@ -60,6 +77,15 @@
     </div>
     <div class="map-container">
       <div id="map"></div>
+    </div>
+    <div class="lower-bar">
+		<div class="text-entry">
+          <label for="start">Starting Point:</label>
+          <input type="text" id="start" name="start"><br><br>
+          <label for="distance">Distance Goal:</label>
+  		  <input type="number" id="distance" name="distance"><br><br>
+          <button type="submit">Calculate Route</button>
+    	</div>
     </div>
     <script>
       mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZ2Frb2hsZXIiLCJhIjoiY21oNmNteHM3MGlueDJrcTJnYnhrNG1hdSJ9.Jms57i-_QvRWoquaAuy-1A';
@@ -80,8 +106,6 @@
         .setcoord(coord)
         .addTo(map);
 }
-
-
     </script>
   </body>
 </html>
