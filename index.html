@@ -34,42 +34,19 @@
         zoom: 10
       });
 
-      map.on('click', (event) => {
-        const features = map.queryRenderedFeatures(event.point, {
-          layers: ['Museums']
-        });
-        if (!features.length) {
-          return;
-        }
-        const feature = features[0];
+    map.on('click', (e) => {
+    // e.lngLat contains the longitude and latitude of the clicked point
+    const clickedLngLat = e.lngLat;
+    console.log(`Map clicked at: ${clickedLngLat.lng}, ${clickedLngLat.lat}`);
+    addMarker(clickedLngLat); // Call a function to add the marker
+    });
+    function addMarker(lngLat) {
+    new mapboxgl.Marker()
+        .setLngLat(lngLat)
+        .addTo(map);
+}
 
-        const popup = new mapboxgl.Popup({ offset: [0, -15] })
-          .setLngLat(feature.geometry.coordinates)
-          .setHTML(
-            `<h3>${feature.properties.name}</h3><p>Hours: ${feature.properties.opening_hours}</p>
-            <p>Museum Score: ${feature.properties.MuseumScore}</p>`
-          
-          )
-          .addTo(map);
-      });
 
-      map.on('click', (event) => {
-        const features = map.queryRenderedFeatures(event.point, {
-          layers: ['Thrift Stores']
-        });
-        if (!features.length) {
-          return;
-        }
-        const feature = features[0];
-
-        const popup = new mapboxgl.Popup({ offset: [0, -15] })
-          .setLngLat(feature.geometry.coordinates)
-          .setHTML(
-            `<h3>${feature.properties.name}</h3><p>Hours: ${feature.properties.opening_hours}</p>`
-          
-          )
-          .addTo(map);
-      });
     </script>
   </body>
 </html>
