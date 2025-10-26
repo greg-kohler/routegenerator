@@ -77,11 +77,16 @@
     </div>
     <div class="lower-bar">
 		<div class="text-entry">
-          <label for="start">Starting Point:</label>
-          <input type="text" id="start" name="start"><br><br>
-          <label for="distance">Distance Goal:</label>
-  		  <input type="number" id="distance" name="distance"><br><br>
-          <button type="submit">Calculate Route</button>
+      <label for="start">Starting Point:</label>
+      <input type="text" id="start" name="start"><br>
+      <label for="distance">Distance Goal:</label>
+  		<input type="number" id="distance" name="distance"><br>
+      <p>Route Type:</p>
+      <input type="radio" id="oneway" name="type" value="oneway">
+      <label for="oneway">One Way</label>
+      <input type="radio" id="loop" name="type" value="loop">
+      <label for="loop">Loop</label><br><br>
+      <button type="submit">Calculate Route</button>
     	</div>
     </div>
     <script>
