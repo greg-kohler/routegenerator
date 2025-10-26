@@ -128,7 +128,7 @@
     });
     map.addControl(currentloc);
 
-    geolocate.on('geolocate', (event) => {
+    geolocate.on('currentloc', (event) => {
         const currentlat = event.coords.latitude;
         const currentlon = event.coords.longitude;
         document.getElementById('startlat').value = currentlat
