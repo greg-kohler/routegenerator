@@ -125,14 +125,18 @@
     const latinput = document.getElementById('startlat');
     const loninput = document.getElementById('startlon')
     const submitButton = document.getElementById('submit');
+    let startMarker = null;
 
     submitButton.addEventListener('click', () => {
+        if (startMarker !== null) {
+          startMarker.remove();
+        }
         const latcoord = latinput.value;
         const loncoord = loninput.value;
         console.log(`Coordinates Submitted: ${loncoord} & ${latcoord}`)
-            new mapboxgl.Marker()
-                .setLngLat([loncoord, latcoord])
-                .addTo(map);
+        startMarker = new mapboxgl.Marker()
+          .setLngLat([loncoord, latcoord])
+          .addTo(map);
 
     });
 
