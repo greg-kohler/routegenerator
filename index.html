@@ -94,8 +94,10 @@
     </div>
     <div class="lower-bar">
 	<div class="text-entry">
-        <label for="start">Starting Point:</label>
-        <input type="text" id="start" name="start"><br><br>
+        <label for="startlat">Starting Latitude:</label>
+        <input type="number" id="startlat" name="startlat"><br><br>
+        <label for="startlon">Starting Longitude:</label>
+        <input type="number" id="startlon" name="startlon"><br><br>
         <label for="distance">Distance Goal:</label>
         <input type="number" id="distance" name="distance"><br><br>
         <label>Route Type:</label>
@@ -121,14 +123,16 @@
         .setcoord(startcoord)
         .addTo(map);
 }
-    const coordinput = document.getElementById('start');
+    const latinput = document.getElementById('startlat');
+    const loninput = document.getElementById('startlon')
     const submitButton = document.getElementById('submit');
 
     submitButton.addEventListener('click', () => {
-        const coord = coordinput.value;
-        console.log(`Coordinates Submitted: ${coord}`)
+        const latcoord = latinput.value;
+        const loncoord = loninput.value;
+        console.log(`Coordinates Submitted: ${latcoord} & ${loncoord}`)
             new mapboxgl.Marker()
-                .setLngLat(coordinput)
+                .setLngLat(latcoord,loncoord)
                 .addTo(map);
 
     });
