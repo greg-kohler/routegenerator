@@ -128,7 +128,7 @@
         const coord = (coordinput);
         console.log(`Coordinates Submitted: ${coord}`)
             new mapboxgl.Marker()
-                .setcoord(coordinput)
+                .setLngLat(coordinput)
                 .addTo(map);
 
     });
