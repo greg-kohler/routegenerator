@@ -120,7 +120,7 @@
       zoom: 10
     });
     
-    const currentloc = new mapboxgl.GeolocateControl({
+    var currentloc = new mapboxgl.GeolocateControl({
       positionOptions: {
           enableHighAccuracy: true
       },
@@ -131,9 +131,9 @@
     currentloc.on('currentloc', (event) => {
         var currentlat = event.coords.latitude;
         var currentlon = event.coords.longitude;
-        console.log(`Current Coords: ${currentlat} & ${currentlon}`);
         var currentlatvalue = currentlat.value;
         var currentlonvalue = currentlon.value;
+        console.log(`Current Coords: ${currentlatvalue} & ${currentlonvalue}`);
         document.getElementById('startlat').value = currentlatvalue;
         document.getElementById('startlon').value = currentlonvalue;
     });
