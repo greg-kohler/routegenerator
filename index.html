@@ -132,8 +132,8 @@
         var currentlat = event.coords.latitude;
         var currentlon = event.coords.longitude;
         console.log(`Current Coords: ${currentlat} & ${currentlon}`);
-        document.getElementById('startlat').value = currentlatvalue;
-        document.getElementById('startlon').value = currentlonvalue;
+        document.getElementById('startlat').value = currentlat;
+        document.getElementById('startlon').value = currentlon;
     });
 
     function addMarker(coord) {
