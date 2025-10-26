@@ -24,6 +24,7 @@
         margin: 0;
         padding: 0;
         font-family: "TikTok Sans", sans-serif;
+        background-color: #D38B5D;
       }
 
       #map {
@@ -37,6 +38,7 @@
         z-index: 1;
       }
       .header-bar {
+      	style: None;
         height: 5vh;
         overflow: hidden;
         background-color: #2C5530;
@@ -47,48 +49,62 @@
         display: flex;
         align-items: center;
         z-index: 2;
+		text-align: center;
       }
       .lower-bar {
-      height: 30%;
       background-color: #D38B5D;
       color: white;
-      bottom: 0;
       width: 100%;
       display: flex;
       justify-content: center;
+      z-index 2;
       }
       
-      h1 {
+      .main-header {
       margin-left: 0.5em;
       font-size: 3vh;
+      font-weight: bold;
       }
       
       .text-entry {
       margin-top: 1vh;
+      text-align: center;
+      }
+      
+      input {
+      color: black;
+      }
+
+      .btn-primary, .btn-primary:active, .btn-primary:focus {
+      background-color: #739E82;
+      border: 0;
+      }
+      
+      .btn-primary:hover, .btn-primary:active, .btn-primary:active:focus {
+      background-color: #2C5530 !important;
       }
       
     </style>
   </head>
   <body>
     <div class="header-bar">
-      <h1>Pedestrian Route Generator</h1>
+      <div class="main-header">Pedestrian Route Generator</div>
     </div>
     <div class="map-container">
       <div id="map"></div>
     </div>
     <div class="lower-bar">
-		<div class="text-entry">
-      <label for="start">Starting Point:</label>
-      <input type="text" id="start" name="start"><br><br>
-      <label for="distance">Distance Goal:</label>
-  		<input type="number" id="distance" name="distance"><br>
-      <p>Route Type:</p>
-      <input type="radio" id="oneway" name="type" value="oneway">
-      <label for="oneway">One Way</label>
-      <input type="radio" id="loop" name="type" value="loop">
-      <label for="loop">Loop</label><br><br>
-      <button type="submit">Calculate Route</button>
-    	</div>
+	<div class="text-entry">
+        <label for="start">Starting Point:</label>
+        <input type="text" id="start" name="start"><br><br>
+        <label for="distance">Distance Goal:</label>
+        <input type="number" id="distance" name="distance"><br><br>
+        <label>Route Type:</label>
+        <input type="radio" id="oneway" name="type" value="oneway">
+        <label for="oneway">One Way</label>
+        <input type="radio" id="loop" name="type" value="loop">
+        <label for="loop">Loop</label><br><br>
+     <button class="btn btn-primary" type="button" onclick="addMarker">Calculate Route</button>
     </div>
     <script>
       mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZ2Frb2hsZXIiLCJhIjoiY21oNmNteHM3MGlueDJrcTJnYnhrNG1hdSJ9.Jms57i-_QvRWoquaAuy-1A';
@@ -100,7 +116,7 @@
       });
 
     map.on('click', (e) => {
-    const startcoord = e.coord;
+    const startcoord = document.getElementById('start');;
     console.log(`Map clicked at: ${startcoord.lng}, ${startcoord.lat}`);
     addMarker(startcoord);
     });
