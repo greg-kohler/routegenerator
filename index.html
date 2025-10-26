@@ -103,7 +103,7 @@
         <label for="oneway">One Way</label>
         <input type="radio" id="loop" name="type" value="loop">
         <label for="loop">Loop</label><br><br>
-     <button class="btn btn-primary" type="button" onclick="addMarker">Calculate Route</button>
+     <button id="submit" class="btn btn-primary" type="button" onclick="addMarker">Calculate Route</button>
     </div>
     <script>
       mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZ2Frb2hsZXIiLCJhIjoiY21oNmNteHM3MGlueDJrcTJnYnhrNG1hdSJ9.Jms57i-_QvRWoquaAuy-1A';
@@ -113,7 +113,7 @@
         center: [-93.2010, 44.9375],
         zoom: 10
       });
-      
+
     function addMarker(coord) {
     const startcoord = document.getElementById('start');
     console.log(`Coordinates Submitted: ${startcoord}`)
@@ -121,7 +121,17 @@
         .setcoord(startcoord)
         .addTo(map);
 }
+    const coordinput = document.getElementById('start');
+    const submitButton = document.getElementById('submit');
 
+    submitButton.addEventListener('click', () => {
+        const coord = (coordinput);
+        console.log(`Coordinates Submitted: ${coord}`)
+            new mapboxgl.Marker()
+                .setcoord(coordinput)
+                .addTo(map);
+
+    });
 
     </script>
   </body>
