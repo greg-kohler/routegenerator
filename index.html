@@ -113,14 +113,10 @@
         center: [-93.2010, 44.9375],
         zoom: 10
       });
-
-    map.on('click', (e) => {
-    const startcoord = document.getElementById('start');
-    console.log(`Map clicked at: ${startcoord}`);
-    addMarker(startcoord);
-    });
+      
     function addMarker(coord) {
     const startcoord = document.getElementById('start');
+    console.log(`Coordinates Submitted: ${startcoord}`)
     new mapboxgl.Marker()
         .setcoord(startcoord)
         .addTo(map);
