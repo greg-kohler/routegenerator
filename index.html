@@ -132,7 +132,7 @@
         const loncoord = loninput.value;
         console.log(`Coordinates Submitted: ${latcoord} & ${loncoord}`)
             new mapboxgl.Marker()
-                .setLngLat(latcoord,loncoord)
+                .setLngLat([latcoord,loncoord])
                 .addTo(map);
 
     });
