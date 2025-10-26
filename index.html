@@ -125,7 +125,7 @@
     const submitButton = document.getElementById('submit');
 
     submitButton.addEventListener('click', () => {
-        const coord = convertHtmlToPlainText(coordinput);
+        const coord = coordinput.value;
         console.log(`Coordinates Submitted: ${coord}`)
             new mapboxgl.Marker()
                 .setLngLat(coordinput)
