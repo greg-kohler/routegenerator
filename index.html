@@ -24,7 +24,6 @@
         margin: 0;
         padding: 0;
         font-family: "TikTok Sans", sans-serif;
-        background-color: #D38B5D;
       }
 
       #map {
@@ -116,13 +115,14 @@
       });
 
     map.on('click', (e) => {
-    const startcoord = document.getElementById('start');;
-    console.log(`Map clicked at: ${startcoord.lng}, ${startcoord.lat}`);
+    const startcoord = document.getElementById('start');
+    console.log(`Map clicked at: ${startcoord}`);
     addMarker(startcoord);
     });
     function addMarker(coord) {
+    const startcoord = document.getElementById('start');
     new mapboxgl.Marker()
-        .setcoord(coord)
+        .setcoord(startcoord)
         .addTo(map);
 }
 
