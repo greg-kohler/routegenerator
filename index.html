@@ -128,7 +128,7 @@
     });
     map.addControl(currentloc);
 
-    geolocate.on('currentloc', (event) => {
+    currentloc.on('currentloc', (event) => {
         const currentlat = event.coords.latitude;
         const currentlon = event.coords.longitude;
         console.log(`Current Coords: ${currentlat} & ${currentlon}`)
