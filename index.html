@@ -59,7 +59,7 @@
       display: flex;
       justify-content: center;
       z-index: 2;
-      flex-grow: 1;
+      flex-grow: 2;
       }
       
       .main-header {
@@ -119,7 +119,7 @@
       center: [-93.2010, 44.9375],
       zoom: 10
     });
-    
+    // Current Location Fetching
     var currentloc = new mapboxgl.GeolocateControl({
       positionOptions: {
           enableHighAccuracy: true
@@ -128,6 +128,7 @@
     });
     map.addControl(currentloc);
 
+    // Get current coords and add to form
     currentloc.on('geolocate', (event) => {
         var currentlat = event.coords.latitude;
         var currentlon = event.coords.longitude;
@@ -136,18 +137,22 @@
         document.getElementById('startlon').value = currentlon;
     });
 
+    // Add marker to map when coordinates submitted
     function addMarker(coord) {
     const startcoord = document.getElementById('start');
     console.log(`Coordinates Submitted: ${startcoord}`)
     new mapboxgl.Marker()
         .setcoord(startcoord)
         .addTo(map);
-}
+    }
+
+    // Get variables from form
     const latinput = document.getElementById('startlat');
     const loninput = document.getElementById('startlon');
     const submitButton = document.getElementById('submit');
     let startMarker = null;
 
+    // Action after submit button
     submitButton.addEventListener('click', () => {
         if (startMarker !== null) {
           startMarker.remove();
