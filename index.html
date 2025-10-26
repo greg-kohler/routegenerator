@@ -128,13 +128,10 @@
     });
     map.addControl(currentloc);
 
-    currentloc.on('currentloc', (event) => {
+    currentloc.on('geolocate', (event) => {
         var currentlat = event.coords.latitude;
         var currentlon = event.coords.longitude;
-        console.log("Current LAT", currentlat);
-        var currentlatvalue = currentlat.value;
-        var currentlonvalue = currentlon.value;
-        console.log(`Current Coords: ${currentlatvalue} & ${currentlonvalue}`);
+        console.log(`Current Coords: ${currentlat} & ${currentlon}`);
         document.getElementById('startlat').value = currentlatvalue;
         document.getElementById('startlon').value = currentlonvalue;
     });
