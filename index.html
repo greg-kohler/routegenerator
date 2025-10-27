@@ -1,57 +1,58 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Route Generator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.js"></script>
-    <link
-      href="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.css"
-      rel="stylesheet"
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?			family=TikTok+Sans:opsz,wght@12..36,300..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: "TikTok Sans", sans-serif;
-      }
-      .window-div {
-        height: 100vh;
-        width: 100vw;
-        display: flex;
-        flex-direction: column;
-      }
-      #map {
-        width: 100%;
-        height: 100%;
-      }
 
-      .map-container {
-        width: 100%;
-        height: 80%;
-        z-index: 1;
-        flex-grow: 1;
-      }
+<head>
+  <meta charset="utf-8" />
+  <title>Route Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?			family=TikTok+Sans:opsz,wght@12..36,300..900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "TikTok Sans", sans-serif;
+    }
 
-      .header-bar {
-        height: 7vh;
-        overflow: auto;
-        background-color: #2C5530;
-        color: white;
-        width: 100%;
-        align-items: center;
-        z-index: 2;
-        justify-content: center;
-        display: flex;
-        font-weight: bold;
-        font-size: clamp(1rem, 2vw + 1rem, 3rem);
-      }
+    .window-div {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+    }
 
-      .lower-bar {
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    .map-container {
+      width: 100%;
+      height: 80%;
+      z-index: 1;
+      flex-grow: 1;
+    }
+
+    .header-bar {
+      height: 7vh;
+      overflow: auto;
+      background-color: #2C5530;
+      color: white;
+      width: 100%;
+      align-items: center;
+      z-index: 2;
+      justify-content: center;
+      display: flex;
+      font-weight: bold;
+      font-size: clamp(1rem, 2vw + 1rem, 3rem);
+    }
+
+    .lower-bar {
       background-color: #D38B5D;
       color: white;
       justify-content: center;
@@ -59,107 +60,148 @@
       height: fit-content;
       bottom: 0;
       width: 100%;
-      }
-      
-      .main-header {
-      margin-left: 0.5em;
-      font-size: 3vh;
-      font-weight: bold;
-      }
-      
-      .text-entry {
+      text-align: center;
       padding-top: 1vh;
+      padding-bottom: 2vh;
+      align-content: center;
+    }
+
+    .text-entry {
       text-align: center;
       padding-bottom: 2vh;
       height: fit-content;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
-      }
-      
-      input {
+      align-content: center;
+      justify-content: center;
+      padding-right: 1vw;
+      padding-left: 1vw;
+    }
+
+    input {
       color: black;
       margin-bottom: 2px;
-      }
+    }
 
-      .btn-primary, .btn-primary:active, .btn-primary:focus {
+    .btn-primary,
+    .btn-primary:active,
+    .btn-primary:focus {
       background-color: #739E82;
       border: 0;
-      }
-      
-      .btn-primary:hover, .btn-primary:active, .btn-primary:active:focus {
+    }
+
+    .btn-primary:hover,
+    .btn-primary:active,
+    .btn-primary:active:focus {
       background-color: #2C5530 !important;
-      }
+    }
 
-      .h4-custom {
-        font-size: 1.2em;
-        font-weight: bold;
-      }
+    .h4-custom {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
 
-      label {
-        font-size: 1em;
-        font-weight: normal;
-      }
+    label {
+      font-size: 1em;
+      font-weight: normal;
+    }
 
-      input[type="radio"]:checked, input[type="checkbox"]:checked {
-        accent-color: black;
-      }
-      
-      .input-box, .radio-box {
-        padding-bottom: 1vh;
-      }
+    input[type="radio"]:checked,
+    input[type="checkbox"]:checked {
+      accent-color: black;
+    }
 
+    .input-box,
+    .radio-box {
+      padding-bottom: 1vh;
+      flex-direction: row;
+      display: inline-block;
+      padding-inline: 1vw; 
+    }
+
+    .radio-box {
+      flex-direction: column;
+    }
+
+    .radio-subbox {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .input-column {
+      flex-direction: column;
+      display:flex;
+    }
+
+    .radio-label {
+      padding-left: 1vw;
+    }
+
+    @media (orientation: portrait) {
+
+      .input-box,
       .radio-box {
-        display: flex;
-        flex-direction: row;
-      }
-
-      @media (orientation: portrait) {
-      .input-box, .radio-box {
         display: flex;
         flex-direction: column;
         padding-bottom: 1vh;
       }
+
+      .text-entry {
+        flex-direction: column;
+      }
+
+      .radio-box {
+        flex-direction: row;
+      }
     }
-      
-    </style>
-  </head>
-  <body>
-    <div class="window-div">
-      <div class="header-bar">Pedestrian Route Generator</div>
-      <div class="map-container">
-        <div id="map"></div>
-      </div>
-      <div class="lower-bar">
-    <div class="text-entry">
-          <p class="h4-custom">Route Specifications</p>
-          <div class="input-box">
-            <label for="startlat">Coordinates (Lat/Long):</label>
+  </style>
+</head>
+
+<body>
+  <div class="window-div">
+    <div class="header-bar">Pedestrian Route Generator</div>
+    <div class="map-container">
+      <div id="map"></div>
+    </div>
+    <div class="lower-bar">
+      <p class="h4-custom">Route Specifications</p>
+      <div class="text-entry">
+        <div class="input-box">
+          <label for="startlat">Coordinates (Lat/Long):</label>
+          <div class="input-column">
             <input type="number" id="startlat" name="startlat">
             <input type="number" id="startlon" name="startlon">
           </div>
-          <div class="input-box">
-            <label for="distance">Distance Goal:</label>
-            <input type="number" id="distance" name="distance">
+        </div>
+        <div class="input-box">
+          <label for="distance">Distance Goal (miles):</label>
+          <div>
+          <input type="number" id="distance" name="distance">
           </div>
-          <div class="radio-box">
-            <label>Route Type:</label>
-            <div>
+        </div>
+        <div class="radio-box">
+          <label>Route Type:</label>
+          <div class="radio-subbox">
+            <div class="radio-label">
             <input type="radio" id="oneway" name="type" value="oneway">
             <label for="oneway">One Way</label>
+            </div>
+            <div class="radio-label">
             <input type="radio" id="loop" name="type" value="loop">
             <label for="loop">Loop</label>
             </div>
-            </div>
-            <div>
-            <label for="highway">Avoid Highways?</label>
-            <input type="checkbox" id="highway" name="highway" value="highway">
-            </div>
-          <button id="submit" class="btn btn-primary" type="button" onclick="addMarker">Calculate Route</button>
           </div>
+        </div>
+        <div class="radio-label">
+          <label for="highway">Avoid Highways?</label>
+          <input type="checkbox" id="highway" name="highway" value="highway">
+        </div>
       </div>
+      <button id="submit" class="btn btn-primary" type="button" onclick="addMarker">Calculate Route</button>
     </div>
-    <script>
+  </div>
+  <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZ2Frb2hsZXIiLCJhIjoiY21oNmNteHM3MGlueDJrcTJnYnhrNG1hdSJ9.Jms57i-_QvRWoquaAuy-1A';
     const map = new mapboxgl.Map({
       container: 'map',
@@ -170,7 +212,7 @@
     // Current Location Fetching
     var currentloc = new mapboxgl.GeolocateControl({
       positionOptions: {
-          enableHighAccuracy: true
+        enableHighAccuracy: true
       },
       trackUserLocation: true
     });
@@ -179,19 +221,19 @@
 
     // Get current coords and add to form and marker
     currentloc.on('geolocate', (event) => {
-        var currentlat = event.coords.latitude;
-        var currentlon = event.coords.longitude;
-        console.log(`Current Coords: ${currentlat} & ${currentlon}`);
-        document.getElementById('startlat').value = currentlat;
-        document.getElementById('startlon').value = currentlon;
-        if (startMarker !== null) {
-          startMarker.remove();
-        }
-        const latcoord = currentlat.value;
-        const loncoord = currentlon.value;
-        startMarker = new mapboxgl.Marker()
-          .setLngLat([loncoord, latcoord])
-          .addTo(map);
+      var currentlat = event.coords.latitude;
+      var currentlon = event.coords.longitude;
+      console.log(`Current Coords: ${currentlat} & ${currentlon}`);
+      document.getElementById('startlat').value = currentlat;
+      document.getElementById('startlon').value = currentlon;
+      if (startMarker !== null) {
+        startMarker.remove();
+      }
+      const latcoord = currentlat.value;
+      const loncoord = currentlon.value;
+      startMarker = new mapboxgl.Marker()
+        .setLngLat([loncoord, latcoord])
+        .addTo(map);
     });
 
     // Or get coords based on click
@@ -203,8 +245,8 @@
       document.getElementById('startlat').value = currentlat;
       document.getElementById('startlon').value = currentlon;
       if (startMarker !== null) {
-          startMarker.remove();
-        }
+        startMarker.remove();
+      }
       startMarker = new mapboxgl.Marker()
         .setLngLat([currentlon, currentlat])
         .addTo(map);
@@ -217,9 +259,9 @@
 
     // Add marker to map when coordinates submitted
     function addMarker(coord) {
-    const startcoord = document.getElementById('start');
-    console.log(`Coordinates Submitted: ${startcoord}`)
-    new mapboxgl.Marker()
+      const startcoord = document.getElementById('start');
+      console.log(`Coordinates Submitted: ${startcoord}`)
+      new mapboxgl.Marker()
         .setcoord(startcoord)
         .addTo(map);
     }
@@ -231,18 +273,19 @@
 
     // Action after submit button
     submitButton.addEventListener('click', () => {
-        if (startMarker !== null) {
-          startMarker.remove();
-        }
-        const latcoord = latinput.value;
-        const loncoord = loninput.value;
-        console.log(`Coordinates Submitted: ${loncoord} & ${latcoord}`)
-        startMarker = new mapboxgl.Marker()
-          .setLngLat([loncoord, latcoord])
-          .addTo(map);
+      if (startMarker !== null) {
+        startMarker.remove();
+      }
+      const latcoord = latinput.value;
+      const loncoord = loninput.value;
+      console.log(`Coordinates Submitted: ${loncoord} & ${latcoord}`)
+      startMarker = new mapboxgl.Marker()
+        .setLngLat([loncoord, latcoord])
+        .addTo(map);
 
     });
 
-    </script>
-  </body>
+  </script>
+</body>
+
 </html>
