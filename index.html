@@ -140,14 +140,23 @@
       trackUserLocation: true
     });
     map.addControl(currentloc);
+    let startMarker = null;
 
-    // Get current coords and add to form
+    // Get current coords and add to form and marker
     currentloc.on('geolocate', (event) => {
         var currentlat = event.coords.latitude;
         var currentlon = event.coords.longitude;
         console.log(`Current Coords: ${currentlat} & ${currentlon}`);
         document.getElementById('startlat').value = currentlat;
         document.getElementById('startlon').value = currentlon;
+        if (startMarker !== null) {
+          startMarker.remove();
+        }
+        const latcoord = currentlat.value;
+        const loncoord = currentlon.value;
+        startMarker = new mapboxgl.Marker()
+          .setLngLat([loncoord, latcoord])
+          .addTo(map);
     });
 
     // Or get coords based on click
@@ -158,6 +167,9 @@
       console.log(`Current Coords: ${currentlat} & ${currentlon}`);
       document.getElementById('startlat').value = currentlat;
       document.getElementById('startlon').value = currentlon;
+      if (startMarker !== null) {
+          startMarker.remove();
+        }
       startMarker = new mapboxgl.Marker()
         .setLngLat([currentlon, currentlat])
         .addTo(map);
@@ -176,7 +188,6 @@
     const latinput = document.getElementById('startlat');
     const loninput = document.getElementById('startlon');
     const submitButton = document.getElementById('submit');
-    let startMarker = null;
 
     // Action after submit button
     submitButton.addEventListener('click', () => {
