@@ -141,8 +141,8 @@
 
     // Get current coords and add to form
     currentloc.on('geolocate', (event) => {
-        var currentlat = event.coords.lat;
-        var currentlon = event.coords.lng;
+        var currentlat = event.coords.latitude;
+        var currentlon = event.coords.longitude;
         console.log(`Current Coords: ${currentlat} & ${currentlon}`);
         document.getElementById('startlat').value = currentlat;
         document.getElementById('startlon').value = currentlon;
@@ -151,8 +151,8 @@
     // Or get coords based on click
     map.on('click', (event) => {
       var clickcoords = event.lngLat;
-      var currentlat = clickcoords.latitude;
-      var currentlon = clickcoords.longitude;
+      var currentlat = clickcoords.lat;
+      var currentlon = clickcoords.lng;
       console.log(`Current Coords: ${currentlat} & ${currentlon}`);
       document.getElementById('startlat').value = currentlat;
       document.getElementById('startlon').value = currentlon;
