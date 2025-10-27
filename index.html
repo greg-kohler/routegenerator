@@ -127,7 +127,7 @@
      <button id="submit" class="btn btn-primary" type="button" onclick="addMarker">Calculate Route</button>
     </div>
     <script>
-    mapboxgl.accessToken ='pk.eyJ1IjoiZ3JlZ2Frb2hsZXIiLCJhIjoiY21oNmNteHM3MGlueDJrcTJnYnhrNG1hdSJ9.Jms57i-_QvRWoquaAuy-1A';
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZ2Frb2hsZXIiLCJhIjoiY21oNmNteHM3MGlueDJrcTJnYnhrNG1hdSJ9.Jms57i-_QvRWoquaAuy-1A';
     const map = new mapboxgl.Map({
       container: 'map',
       style: 'mapbox://styles/gregakohler/cmh56515s00x301qocqgl025n',
@@ -150,6 +150,12 @@
         console.log(`Current Coords: ${currentlat} & ${currentlon}`);
         document.getElementById('startlat').value = currentlat;
         document.getElementById('startlon').value = currentlon;
+    });
+
+    // Or get coords based on click
+    map.on('click', (event) => {
+      var currentlat = event.coords.latitude;
+      var currentlon = event.coords.longitude;
     });
 
     // Add marker to map when coordinates submitted
