@@ -38,19 +38,17 @@
       }
 
       .header-bar {
-        height: 7%;
+        height: 7vh;
         overflow: auto;
         background-color: #2C5530;
         color: white;
-        top: 0; 
         width: 100%;
         align-items: center;
         z-index: 2;
-		    text-align: center;
         justify-content: center;
         display: flex;
         font-weight: bold;
-        font-size: 110%; 
+        font-size: clamp(1rem, 2vw + 1rem, 3rem);
       }
 
       .lower-bar {
@@ -81,6 +79,7 @@
       
       input {
       color: black;
+      margin-bottom: 2px;
       }
 
       .btn-primary, .btn-primary:active, .btn-primary:focus {
@@ -102,7 +101,7 @@
         font-weight: normal;
       }
 
-      input[type="radio"]:checked {
+      input[type="radio"]:checked, input[type="checkbox"]:checked {
         accent-color: black;
       }
       
@@ -117,7 +116,6 @@
 
       @media (orientation: portrait) {
       .input-box, .radio-box {
-        width: 300px;
         display: flex;
         flex-direction: column;
         padding-bottom: 1vh;
@@ -152,8 +150,13 @@
             <input type="radio" id="loop" name="type" value="loop">
             <label for="loop">Loop</label>
             </div>
+            </div>
+            <div>
+            <label for="highway">Avoid Highways?</label>
+            <input type="checkbox" id="highway" name="highway" value="highway">
+            </div>
+          <button id="submit" class="btn btn-primary" type="button" onclick="addMarker">Calculate Route</button>
           </div>
-      <button id="submit" class="btn btn-primary" type="button" onclick="addMarker">Calculate Route</button>
       </div>
     </div>
     <script>
