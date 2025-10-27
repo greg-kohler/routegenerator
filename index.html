@@ -20,6 +20,7 @@
         margin: 0;
         padding: 0;
         font-family: "TikTok Sans", sans-serif;
+        overflow: hidden;
       }
 
       #map {
@@ -51,12 +52,9 @@
       .lower-bar {
       background-color: #D38B5D;
       color: white;
-      width: 100%;
-      display: flex;
       justify-content: center;
       z-index: 2;
-      flex: 1;
-      height: auto;
+      height: fit-content;
       }
       
       .main-header {
@@ -150,9 +148,11 @@
     });
 
     // Or get coords based on click
+    map.addEventListener('click', onClick);
     map.on('click', (event) => {
-      var currentlat = event.coords.latitude;
-      var currentlon = event.coords.longitude;
+      var clickcoords = event.lngLat;
+      var currentlat = clickedcoords.lat;
+      var currentlon = clickcoords.long;
       console.log(`Current Coords: ${currentlat} & ${currentlon}`);
       document.getElementById('startlat').value = currentlat;
       document.getElementById('startlon').value = currentlon;
