@@ -87,6 +87,20 @@
       .btn-primary:hover, .btn-primary:active, .btn-primary:active:focus {
       background-color: #2C5530 !important;
       }
+
+      .h4-custom {
+        font-size: 1.5em;
+        font-weight: bold;
+      }
+
+      label {
+        font-size: 1em;
+        font-weight: normal;
+      }
+
+      input[type="radio"]:checked {
+        accent-color: black;
+      }
       
     </style>
   </head>
@@ -99,6 +113,7 @@
     </div>
     <div class="lower-bar">
 	<div class="text-entry">
+        <p class="h4-custom">Route Specifications</p>
         <label for="startlat">Coordinates (Lat/Long):</label>
         <input type="number" id="startlat" name="startlat">
         <input type="number" id="startlon" name="startlon"><br><br>
@@ -112,7 +127,7 @@
      <button id="submit" class="btn btn-primary" type="button" onclick="addMarker">Calculate Route</button>
     </div>
     <script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZ2Frb2hsZXIiLCJhIjoiY21oNmNteHM3MGlueDJrcTJnYnhrNG1hdSJ9.Jms57i-_QvRWoquaAuy-1A';
+    mapboxgl.accessToken ='pk.eyJ1IjoiZ3JlZ2Frb2hsZXIiLCJhIjoiY21oNmNteHM3MGlueDJrcTJnYnhrNG1hdSJ9.Jms57i-_QvRWoquaAuy-1A';
     const map = new mapboxgl.Map({
       container: 'map',
       style: 'mapbox://styles/gregakohler/cmh56515s00x301qocqgl025n',
