@@ -33,6 +33,7 @@
         width: 100%;
         height: 70%;
         z-index: 1;
+        flex:1;
       }
 
       .header-bar {
@@ -151,7 +152,7 @@
     map.on('click', (event) => {
       var clickcoords = event.lngLat;
       var currentlat = clickcoords.lat;
-      var currentlon = clickcoords.long;
+      var currentlon = clickcoords.lon;
       console.log(`Current Coords: ${currentlat} & ${currentlon}`);
       document.getElementById('startlat').value = currentlat;
       document.getElementById('startlon').value = currentlon;
