@@ -69,8 +69,11 @@
       .text-entry {
       padding-top: 1vh;
       text-align: center;
-      padding-bottom: 1vh;
+      padding-bottom: 2vh;
       height: fit-content;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       }
       
       input {
@@ -87,7 +90,7 @@
       }
 
       .h4-custom {
-        font-size: 1.5em;
+        font-size: 1.3em;
         font-weight: bold;
       }
 
@@ -96,9 +99,32 @@
         font-weight: normal;
       }
 
+      input {
+        border-radius: 5px;
+        border-color: white;
+      }
+
       input[type="radio"]:checked {
         accent-color: black;
       }
+      
+      .input-box, .radio-box {
+        padding-bottom: 1vh;
+      }
+
+      .radio-box {
+        display: flex;
+        flex-direction: row;
+      }
+
+      @media (orientation: portrait) {
+      .input-box, .radio-box {
+        width: 300px;
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 1vh;
+      }
+    }
       
     </style>
   </head>
@@ -113,16 +139,24 @@
       <div class="lower-bar">
     <div class="text-entry">
           <p class="h4-custom">Route Specifications</p>
-          <label for="startlat">Coordinates (Lat/Long):</label>
-          <input type="number" id="startlat" name="startlat">
-          <input type="number" id="startlon" name="startlon"><br><br>
-          <label for="distance">Distance Goal:</label>
-          <input type="number" id="distance" name="distance"><br><br>
-          <label>Route Type:</label>
-          <input type="radio" id="oneway" name="type" value="oneway">
-          <label for="oneway">One Way</label>
-          <input type="radio" id="loop" name="type" value="loop">
-          <label for="loop">Loop</label><br><br>
+          <div class="input-box">
+            <label for="startlat">Coordinates (Lat/Long):</label>
+            <input type="number" id="startlat" name="startlat">
+            <input type="number" id="startlon" name="startlon">
+          </div>
+          <div class="input-box">
+            <label for="distance">Distance Goal:</label>
+            <input type="number" id="distance" name="distance">
+          </div>
+          <div class="radio-box">
+            <label>Route Type:</label>
+            <div>
+            <input type="radio" id="oneway" name="type" value="oneway">
+            <label for="oneway">One Way</label>
+            <input type="radio" id="loop" name="type" value="loop">
+            <label for="loop">Loop</label>
+            </div>
+          </div>
       <button id="submit" class="btn btn-primary" type="button" onclick="addMarker">Calculate Route</button>
       </div>
     </div>
