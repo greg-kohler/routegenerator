@@ -38,17 +38,19 @@
       }
 
       .header-bar {
-        height: 5vh;
+        height: 7%;
         overflow: auto;
         background-color: #2C5530;
         color: white;
-        position: fixed;
         top: 0; 
         width: 100%;
         align-items: center;
         z-index: 2;
 		    text-align: center;
         justify-content: center;
+        display: flex;
+        font-weight: bold;
+        font-size: 110%; 
       }
 
       .lower-bar {
@@ -91,7 +93,7 @@
       }
 
       .h4-custom {
-        font-size: 1.3em;
+        font-size: 1.2em;
         font-weight: bold;
       }
 
@@ -126,9 +128,7 @@
   </head>
   <body>
     <div class="window-div">
-      <div class="header-bar">
-        <div class="main-header">Pedestrian Route Generator</div>
-      </div>
+      <div class="header-bar">Pedestrian Route Generator</div>
       <div class="map-container">
         <div id="map"></div>
       </div>
