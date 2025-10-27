@@ -22,6 +22,7 @@
       .window-div {
         height: 100vh;
         width: 100vw;
+        display: flex;
       }
       #map {
         width: 100%;
@@ -37,13 +38,12 @@
 
       .header-bar {
         height: 5vh;
-        overflow: hidden;
+        overflow: auto;
         background-color: #2C5530;
         color: white;
         position: fixed;
         top: 0; 
         width: 100%;
-        display: flex;
         align-items: center;
         z-index: 2;
 		    text-align: center;
@@ -55,7 +55,6 @@
       justify-content: center;
       z-index: 2;
       height: fit-content;
-      bottom: 0;
       width: 100%;
       }
       
@@ -103,27 +102,27 @@
   </head>
   <body>
     <div class="window-div">
-    <div class="header-bar">
-      <div class="main-header">Pedestrian Route Generator</div>
-    </div>
-    <div class="map-container">
-      <div id="map"></div>
-    </div>
-    <div class="lower-bar">
-	<div class="text-entry">
-        <p class="h4-custom">Route Specifications</p>
-        <label for="startlat">Coordinates (Lat/Long):</label>
-        <input type="number" id="startlat" name="startlat">
-        <input type="number" id="startlon" name="startlon"><br><br>
-        <label for="distance">Distance Goal:</label>
-        <input type="number" id="distance" name="distance"><br><br>
-        <label>Route Type:</label>
-        <input type="radio" id="oneway" name="type" value="oneway">
-        <label for="oneway">One Way</label>
-        <input type="radio" id="loop" name="type" value="loop">
-        <label for="loop">Loop</label><br><br>
-     <button id="submit" class="btn btn-primary" type="button" onclick="addMarker">Calculate Route</button>
-    </div>
+      <div class="header-bar">
+        <div class="main-header">Pedestrian Route Generator</div>
+      </div>
+      <div class="map-container">
+        <div id="map"></div>
+      </div>
+      <div class="lower-bar">
+    <div class="text-entry">
+          <p class="h4-custom">Route Specifications</p>
+          <label for="startlat">Coordinates (Lat/Long):</label>
+          <input type="number" id="startlat" name="startlat">
+          <input type="number" id="startlon" name="startlon"><br><br>
+          <label for="distance">Distance Goal:</label>
+          <input type="number" id="distance" name="distance"><br><br>
+          <label>Route Type:</label>
+          <input type="radio" id="oneway" name="type" value="oneway">
+          <label for="oneway">One Way</label>
+          <input type="radio" id="loop" name="type" value="loop">
+          <label for="loop">Loop</label><br><br>
+      <button id="submit" class="btn btn-primary" type="button" onclick="addMarker">Calculate Route</button>
+      </div>
     </div>
     <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZ2Frb2hsZXIiLCJhIjoiY21oNmNteHM3MGlueDJrcTJnYnhrNG1hdSJ9.Jms57i-_QvRWoquaAuy-1A';
@@ -176,7 +175,7 @@
         .addTo(map);
       map.flyTo({
         center: [currentlon, currentlat],
-        zoom: 5,
+        zoom: 11,
         essential: true
       })
     });
