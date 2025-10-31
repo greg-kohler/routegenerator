@@ -238,10 +238,18 @@
     }
 
     // Generate an array of random points around the start for loops
-    function generateLoopWaypoints(startLat, startLon, segmentDistanceMiles, numPoints = 3) {
+    function generateLoopWaypointsCircle(startLat, startLon, radiusMiles, numPoints = 3) {
       const waypoints = [];
       for (let i = 0; i < numPoints; i++) {
-        waypoints.push(randomDestination(startLat, startLon, segmentDistanceMiles));
+        // Spread angles evenly around a circle + small random offset
+        const angle = (i / numPoints) * 2 * Math.PI + (Math.random() * Math.PI / 8 - Math.PI / 16);
+        const milesPerDegreeLat = 110.574 / 1.60934;
+        const milesPerDegreeLon = (111.320 / 1.60934) * Math.cos(startLat * Math.PI / 180);
+
+        const deltaLat = (Math.sin(angle) * radiusMiles) / milesPerDegreeLat;
+        const deltaLon = (Math.cos(angle) * radiusMiles) / milesPerDegreeLon;
+
+        waypoints.push([startLon + deltaLon, startLat + deltaLat]);
       }
       return waypoints;
     }
@@ -269,31 +277,33 @@
       return data;
     }
 
-    // Generate route to match distance threshold
+    // Main function to generate route to match target distance
     async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, avoidHighways) {
-      const loopPoints = 3;
-      let estimatedRadiusMiles = routeType == 'loop'
-        ? targetDistanceMiles / (2 * loopPoints)
-        : targetDistanceMiles
+      const loopPoints = 3;  // number of waypoints for loop
+      let estimatedRadiusMiles = routeType === 'loop'
+        ? targetDistanceMiles / (2 * loopPoints) // initial guess for loops
+        : targetDistanceMiles;                   // full distance for one-way
 
       let routeDifferenceMiles = Infinity;
       let attemptCount = 0;
-      const maxAttempts = 5;
+      const maxAttempts = 10;  // more attempts for loops
       let bestRouteGeoJSON = null;
 
-      while (routeDifferenceMiles > (targetDistanceMiles * 0.1) && attemptCount < maxAttempts) { // 10% mile tolerance
-        if (routeType === 'loop') {
-          // Generate multi-waypoint loop
-          const loopWaypoints = generateLoopWaypoints(startLat, startLon, estimatedRadiusMiles, loopPoints);
+      while (routeDifferenceMiles > (targetDistanceMiles * 0.1) && attemptCount < maxAttempts) {
+        let routeCoordinates;
 
-          // Build coordinates: start → waypoints → start
+        if (routeType === 'loop') {
+          // Generate multi-waypoint loop using current estimated radius
+          const loopWaypoints = generateLoopWaypointsCircle(startLat, startLon, estimatedRadiusMiles, loopPoints);
+
+          // Build coordinates: start -> waypoints -> start
           routeCoordinates = [
             [Number(startLon), Number(startLat)],
-            ...loopWaypoints.map(p => p.map(Number)), // ensure numeric
+            ...loopWaypoints.map(p => p.map(Number)),  // ensure numeric
             [Number(startLon), Number(startLat)]
           ];
         } else {
-          // One-way route
+          // One-way route: single random point at full distance
           const randomPoint = randomDestination(startLat, startLon, estimatedRadiusMiles);
           routeCoordinates = [
             [Number(startLon), Number(startLat)],
@@ -301,7 +311,7 @@
           ];
         }
 
-        // Step 3: Call ORS
+        // Call OpenRouteService
         const orsResponse = await callORS(routeCoordinates, avoidHighways);
 
         if (!orsResponse.features || orsResponse.features.length === 0) {
@@ -319,9 +329,8 @@
 
         bestRouteGeoJSON = route;
 
-        // Step 4: Adjust radius for next try
+        // Adjust radius for next iteration
         estimatedRadiusMiles *= targetDistanceMiles / actualRouteMiles;
-
         attemptCount++;
       }
 
