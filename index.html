@@ -254,6 +254,17 @@
       return waypoints;
     }
 
+    // Add debug markers for loop or one-way waypoints
+    function addDebugWaypoints(map, waypoints) {
+      waypoints.forEach((coord, i) => {
+        new mapboxgl.Marker({ color: i === 0 ? 'green' : 'red' }) // start green, others red
+          .setLngLat(coord)
+          .setPopup(new mapboxgl.Popup().setText(`Waypoint ${i}`))
+          .addTo(map);
+      });
+    }
+
+
     // Function to call OpenRouteService API
     async function callORS(coordinates, avoidHighways) {
       const requestBody = {
@@ -302,6 +313,8 @@
             ...loopWaypoints.map(p => p.map(Number)),  // ensure numeric
             [Number(startLon), Number(startLat)]
           ];
+          // Add waypoints to map for debugging
+          addDebugWaypoints(map, routeCoordinates);
         } else {
           // One-way route: single random point at full distance
           const randomPoint = randomDestination(startLat, startLon, estimatedRadiusMiles);
@@ -309,6 +322,8 @@
             [Number(startLon), Number(startLat)],
             randomPoint.map(Number)
           ];
+          // Add waypoints to map for debugging
+          addDebugWaypoints(map, routeCoordinates);
         }
 
         // Call OpenRouteService
