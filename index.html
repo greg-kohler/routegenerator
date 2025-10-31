@@ -278,6 +278,7 @@
       return waypoints;
     }
 
+
     // Add debug markers for loop or one-way waypoints
     function addDebugWaypoints(map, waypoints) {
       waypoints.forEach((coord, i) => {
@@ -331,50 +332,50 @@
           const segmentDistance = targetDistanceMiles / loopPoints;
           const loopWaypoints = generateLoopWaypointsFixed(startLat, startLon, segmentDistance, loopPoints);
 
-          // Build coordinates for ORS
           routeCoordinates = [
             [Number(startLon), Number(startLat)],
             ...loopWaypoints.map(p => p.map(Number)),
             [Number(startLon), Number(startLat)]
           ];
-
-          // Add all waypoints to the map
-          addDebugWaypoints(map, routeCoordinates);
-        } else {
-          const randomPoint = randomDestination(startLat, startLon, estimatedRadiusMiles);
-          routeCoordinates = [
-            [Number(startLon), Number(startLat)],
-            randomPoint.map(Number)
-          ];
-
-          addDebugWaypoints(map, routeCoordinates);
         }
 
+        // Add all waypoints to the map
+        addDebugWaypoints(map, routeCoordinates);
+      } else {
+        const randomPoint = randomDestination(startLat, startLon, estimatedRadiusMiles);
+        routeCoordinates = [
+          [Number(startLon), Number(startLat)],
+          randomPoint.map(Number)
+        ];
 
-        // Call OpenRouteService
-        const orsResponse = await callORS(routeCoordinates, avoidHighways);
-
-        if (!orsResponse.features || orsResponse.features.length === 0) {
-          console.warn("No route returned, retrying...");
-          attemptCount++;
-          continue;
-        }
-
-        const route = orsResponse.features[0];
-        // ORS returns distance in meters; convert to miles
-        const actualRouteMiles = route.properties.summary.distance / 1609.34;
-
-        routeDifferenceMiles = Math.abs(actualRouteMiles - targetDistanceMiles);
-        console.log(`Attempt ${attemptCount + 1}: Route = ${actualRouteMiles.toFixed(2)} miles (target ${targetDistanceMiles} miles)`);
-
-        bestRouteGeoJSON = route;
-
-        // Adjust radius for next iteration
-        estimatedRadiusMiles *= targetDistanceMiles / actualRouteMiles;
-        attemptCount++;
+        addDebugWaypoints(map, routeCoordinates);
       }
 
-      return bestRouteGeoJSON;
+
+      // Call OpenRouteService
+      const orsResponse = await callORS(routeCoordinates, avoidHighways);
+
+      if (!orsResponse.features || orsResponse.features.length === 0) {
+        console.warn("No route returned, retrying...");
+        attemptCount++;
+        continue;
+      }
+
+      const route = orsResponse.features[0];
+      // ORS returns distance in meters; convert to miles
+      const actualRouteMiles = route.properties.summary.distance / 1609.34;
+
+      routeDifferenceMiles = Math.abs(actualRouteMiles - targetDistanceMiles);
+      console.log(`Attempt ${attemptCount + 1}: Route = ${actualRouteMiles.toFixed(2)} miles (target ${targetDistanceMiles} miles)`);
+
+      bestRouteGeoJSON = route;
+
+      // Adjust radius for next iteration
+      estimatedRadiusMiles *= targetDistanceMiles / actualRouteMiles;
+      attemptCount++;
+    }
+
+    return bestRouteGeoJSON;
     }
 
     // Add generated route to map
