@@ -383,17 +383,6 @@
         .addTo(map);
     }
 
-    // Get form variables and run
-    document.getElementById('generate').addEventListener('click', async () => {
-      const [lat, lon] = document.getElementById('coords').value.split(',').map(Number);
-      const targetDistanceMiles = parseFloat(document.getElementById('distance').value);
-      const routeType = document.getElementById('type').value;
-      const avoidHighways = document.getElementById('avoidHighways').checked;
-
-
-    });
-
-
     // Get variables from form
     const submitButton = document.getElementById('submit');
 
