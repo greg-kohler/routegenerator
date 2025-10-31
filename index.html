@@ -116,7 +116,7 @@
       padding-bottom: 1vh;
       flex-direction: row;
       display: inline-block;
-      padding-inline: 1vw; 
+      padding-inline: 1vw;
     }
 
     .radio-box {
@@ -130,7 +130,7 @@
 
     .input-column {
       flex-direction: column;
-      display:flex;
+      display: flex;
     }
 
     .radio-label {
@@ -179,19 +179,19 @@
         <div class="input-box">
           <label for="distance">Distance Goal (miles):</label>
           <div>
-          <input type="number" id="distance" name="distance">
+            <input type="number" id="distance" name="distance">
           </div>
         </div>
         <div class="radio-box">
           <label>Route Type:</label>
           <div class="radio-subbox">
             <div class="radio-label">
-            <input type="radio" id="type" name="type" value="oneway">
-            <label for="type">One Way</label>
+              <input type="radio" id="type" name="type" value="oneway">
+              <label for="type">One Way</label>
             </div>
             <div class="radio-label">
-            <input type="radio" id="type" name="type" value="loop">
-            <label for="type">Loop</label>
+              <input type="radio" id="type" name="type" value="loop">
+              <label for="type">Loop</label>
             </div>
           </div>
         </div>
@@ -237,6 +237,15 @@
       return [startLon + deltaLon, startLat + deltaLat];
     }
 
+    // Generate an array of random points around the start for loops
+    function generateLoopWaypoints(startLat, startLon, segmentDistanceMiles, numPoints = 3) {
+      const waypoints = [];
+      for (let i = 0; i < numPoints; i++) {
+        waypoints.push(randomDestination(startLat, startLon, segmentDistanceMiles));
+      }
+      return waypoints;
+    }
+
     // Function to call OpenRouteService API
     async function callORS(coordinates, avoidHighways) {
       const requestBody = {
@@ -262,24 +271,35 @@
 
     // Generate route to match distance threshold
     async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, avoidHighways) {
-      let estimatedRadiusMiles = targetDistanceMiles / (routeType === 'loop' ? 2 : 1); // initial guess
+      const loopPoints = 3;
+      let estimatedRadiusMiles = routeType == 'loop'
+        ? targetDistanceMiles / (2 * loopPoints)
+        : targetDistanceMiles
+
       let routeDifferenceMiles = Infinity;
       let attemptCount = 0;
       const maxAttempts = 5;
       let bestRouteGeoJSON = null;
 
-      while (routeDifferenceMiles > 0.2 && attemptCount < maxAttempts) { // ±0.2 mile tolerance
-        // Step 1: Random destination
-        const randomPoint = randomDestination(startLat, startLon, estimatedRadiusMiles);
-        console.log("Random Point:", randomPoint)
+      while (routeDifferenceMiles > (targetDistanceMiles * 0.1) && attemptCount < maxAttempts) { // 10% mile tolerance
+        if (routeType === 'loop') {
+          // Generate multi-waypoint loop
+          const loopWaypoints = generateLoopWaypoints(startLat, startLon, estimatedRadiusMiles, loopPoints);
 
-        // Step 2: Coordinates array for ORS
-        const routeCoordinates = routeType === 'loop'
-          ? [[startLon, startLat], randomPoint, [startLon, startLat]]
-          : [[startLon, startLat], randomPoint];
-        routeCoordinates.forEach((coord, i) => {
-          console.log(`Point ${i}:`, coord, coord.map(x => typeof x));
-        });
+          // Build coordinates: start → waypoints → start
+          routeCoordinates = [
+            [Number(startLon), Number(startLat)],
+            ...loopWaypoints.map(p => p.map(Number)), // ensure numeric
+            [Number(startLon), Number(startLat)]
+          ];
+        } else {
+          // One-way route
+          const randomPoint = randomDestination(startLat, startLon, estimatedRadiusMiles);
+          routeCoordinates = [
+            [Number(startLon), Number(startLat)],
+            randomPoint.map(Number)
+          ];
+        }
 
         // Step 3: Call ORS
         const orsResponse = await callORS(routeCoordinates, avoidHighways);
@@ -333,7 +353,7 @@
       const bounds = coords.reduce((b, coord) => b.extend(coord), new mapboxgl.LngLatBounds(coords[0], coords[0]));
       map.fitBounds(bounds, { padding: 50 });
     }
-    
+
     // Current Location Fetching
     var currentloc = new mapboxgl.GeolocateControl({
       positionOptions: {
