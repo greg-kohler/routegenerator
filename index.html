@@ -281,7 +281,7 @@
     async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, avoidHighways) {
       const loopPoints = 3;  // number of waypoints for loop
       let estimatedRadiusMiles = routeType === 'loop'
-        ? targetDistanceMiles / (2 * loopPoints) // initial guess for loops
+        ? targetDistanceMiles / (2) // initial guess for loops
         : targetDistanceMiles;                   // full distance for one-way
 
       let routeDifferenceMiles = Infinity;
