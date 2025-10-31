@@ -379,21 +379,19 @@
     // Action after submit button
     submitButton.addEventListener('click', async () => {
       console.log("Submit Button Clicked")
-      const latinput = document.getElementById('startlat').value;
-      const loninput = document.getElementById('startlon').value;
+      const latInput = document.getElementById('startlat').value;
+      const lonInput = document.getElementById('startlon').value;
       const targetDistance = parseFloat(document.getElementById('distance').value);
       const routeType = document.getElementById('type').value;
       const avoidHighways = document.getElementById('highway').checked;
       if (startMarker !== null) {
         startMarker.remove();
       }
-      const latcoord = latinput.value;
-      const loncoord = loninput.value;
-      console.log(`Coordinates Submitted: ${loncoord} & ${latcoord}`)
+      console.log(`Coordinates Submitted: ${latInput} & ${lonInput}`)
       startMarker = new mapboxgl.Marker()
-        .setLngLat([loncoord, latcoord])
+        .setLngLat([lonInput, latInput])
         .addTo(map);
-      const routeGeoJSON = await generateRouteToMatchDistance(latcoord, loncoord, targetDistance, routeType, avoidHighways);
+      const routeGeoJSON = await generateRouteToMatchDistance(latInput, lonInput, targetDistance, routeType, avoidHighways);
       displayRouteOnMap(routeGeoJSON);
 
     });
