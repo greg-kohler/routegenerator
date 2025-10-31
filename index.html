@@ -204,6 +204,8 @@
     </div>
   </div>
   <script>
+
+    // MapBox Tile Setup
     mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZ2Frb2hsZXIiLCJhIjoiY21oNmNteHM3MGlueDJrcTJnYnhrNG1hdSJ9.Jms57i-_QvRWoquaAuy-1A';
     const map = new mapboxgl.Map({
       container: 'map',
@@ -211,6 +213,119 @@
       center: [-93.2010, 44.9375],
       zoom: 10
     });
+
+    // API Key
+    const ORS_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImEyNjk3YjQ5M2QwNTRjZTNiZTZiNzJkZDY5NmM4Y2E0IiwiaCI6Im11cm11cjY0In0=';
+
+    // Generate random destination point
+    function randomDestination(startLat, startLon, distanceMiles) {
+      // Convert latitude/longitude degrees per mile
+      const milesPerDegreeLat = 110.574 / 1.60934; // ≈68.73 miles per degree
+      const milesPerDegreeLon = (111.320 / 1.60934) * Math.cos(startLat * Math.PI / 180); // ≈69.19*cos(lat)
+
+      // Random angle in radians
+      const randomAngle = Math.random() * 2 * Math.PI;
+
+      // Offsets in miles
+      const deltaLat = (Math.sin(randomAngle) * distanceMiles) / milesPerDegreeLat;
+      const deltaLon = (Math.cos(randomAngle) * distanceMiles) / milesPerDegreeLon;
+
+      return [startLon + deltaLon, startLat + deltaLat];
+    }
+
+    // Function to call OpenRouteService API
+    async function callORS(coordinates, avoidHighways) {
+      const requestBody = {
+        coordinates: coordinates,
+        format: 'geojson',
+        options: {
+          avoid_features: avoidHighways ? ['highways'] : []
+        }
+      };
+
+      const response = await fetch('https://api.openrouteservice.org/v2/directions/foot-walking/geojson', {
+        method: 'POST',
+        headers: {
+          'Authorization': ORS_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      const data = await response.json();
+      return data;
+    }
+
+    // Generate route to match distance threshold
+    async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, avoidHighways) {
+      let estimatedRadiusMiles = targetDistanceMiles / (routeType === 'loop' ? 2 : 1); // initial guess
+      let routeDifferenceMiles = Infinity;
+      let attemptCount = 0;
+      const maxAttempts = 5;
+      let bestRouteGeoJSON = null;
+
+      while (routeDifferenceMiles > 0.2 && attemptCount < maxAttempts) { // ±0.2 mile tolerance
+        // Step 1: Random destination
+        const randomPoint = randomDestination(startLat, startLon, estimatedRadiusMiles);
+
+        // Step 2: Coordinates array for ORS
+        const routeCoordinates = routeType === 'loop'
+          ? [[startLon, startLat], randomPoint, [startLon, startLat]]
+          : [[startLon, startLat], randomPoint];
+
+        // Step 3: Call ORS
+        const orsResponse = await callORS(routeCoordinates, avoidHighways);
+
+        if (!orsResponse.features || orsResponse.features.length === 0) {
+          console.warn("No route returned, retrying...");
+          attemptCount++;
+          continue;
+        }
+
+        const route = orsResponse.features[0];
+        // ORS returns distance in meters; convert to miles
+        const actualRouteMiles = route.properties.summary.distance / 1609.34;
+
+        routeDifferenceMiles = Math.abs(actualRouteMiles - targetDistanceMiles);
+        console.log(`Attempt ${attemptCount + 1}: Route = ${actualRouteMiles.toFixed(2)} miles (target ${targetDistanceMiles} miles)`);
+
+        bestRouteGeoJSON = route;
+
+        // Step 4: Adjust radius for next try
+        estimatedRadiusMiles *= targetDistanceMiles / actualRouteMiles;
+
+        attemptCount++;
+      }
+
+      return bestRouteGeoJSON;
+    }
+
+    // Add generated route to map
+    function displayRouteOnMap(routeGeoJSON) {
+      if (!routeGeoJSON) return;
+
+      if (map.getSource('route')) {
+        map.removeLayer('route');
+        map.removeSource('route');
+      }
+
+      map.addSource('route', { type: 'geojson', data: routeGeoJSON });
+      map.addLayer({
+        id: 'route',
+        type: 'line',
+        source: 'route',
+        paint: {
+          'line-color': '#ff5733',
+          'line-width': 4
+        }
+      });
+
+      // Fit map to route bounds
+      const coords = routeGeoJSON.geometry.coordinates;
+      const bounds = coords.reduce((b, coord) => b.extend(coord), new mapboxgl.LngLatBounds(coords[0], coords[0]));
+      map.fitBounds(bounds, { padding: 50 });
+    }
+    
     // Current Location Fetching
     var currentloc = new mapboxgl.GeolocateControl({
       positionOptions: {
@@ -268,13 +383,27 @@
         .addTo(map);
     }
 
+    // Get form variables and run
+    document.getElementById('generate').addEventListener('click', async () => {
+      const [lat, lon] = document.getElementById('coords').value.split(',').map(Number);
+      const targetDistanceMiles = parseFloat(document.getElementById('distance').value);
+      const routeType = document.getElementById('type').value;
+      const avoidHighways = document.getElementById('avoidHighways').checked;
+
+
+    });
+
+
     // Get variables from form
-    const latinput = document.getElementById('startlat');
-    const loninput = document.getElementById('startlon');
     const submitButton = document.getElementById('submit');
 
     // Action after submit button
-    submitButton.addEventListener('click', () => {
+    submitButton.addEventListener('click', async () => {
+      const latinput = document.getElementById('startlat');
+      const loninput = document.getElementById('startlon');
+      const targetDistance = parseFloat(document.getElementById('distance').value);
+      const routeType = document.getElementById('type').value;
+      const avoidHighways = document.getElementById('highway').checked;
       if (startMarker !== null) {
         startMarker.remove();
       }
@@ -284,6 +413,8 @@
       startMarker = new mapboxgl.Marker()
         .setLngLat([loncoord, latcoord])
         .addTo(map);
+      const routeGeoJSON = await generateRouteToMatchDistance(latcoord, loncoord, targetDistance, routeType, avoidHighways);
+      displayRouteOnMap(routeGeoJSON);
 
     });
 
