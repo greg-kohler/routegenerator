@@ -220,6 +220,13 @@
     // Generate random destination point
     function randomDestination(startLat, startLon, distanceMiles) {
       // Convert latitude/longitude degrees per mile
+      console.log("startLon type")
+      console.log(typeof startLon)
+      console.log("startLat type")
+      console.log(typeof startLat)
+      routeCoordinates.forEach((coord, i) => {
+  console.log(`Point ${i}:`, coord, coord.map(x => typeof x));
+});
       const milesPerDegreeLat = 110.574 / 1.60934; // ≈68.73 miles per degree
       const milesPerDegreeLon = (111.320 / 1.60934) * Math.cos(startLat * Math.PI / 180); // ≈69.19*cos(lat)
 
@@ -273,6 +280,9 @@
         const routeCoordinates = routeType === 'loop'
           ? [[startLon, startLat], randomPoint, [startLon, startLat]]
           : [[startLon, startLat], randomPoint];
+        routeCoordinates.forEach((coord, i) => {
+          console.log(`Point ${i}:`, coord, coord.map(x => typeof x));
+        });
 
         // Step 3: Call ORS
         const orsResponse = await callORS(routeCoordinates, avoidHighways);
