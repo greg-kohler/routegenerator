@@ -340,7 +340,7 @@
     currentloc.on('geolocate', (event) => {
       var currentlat = event.coords.latitude;
       var currentlon = event.coords.longitude;
-      console.log(`Current Coords: ${currentlat} & ${currentlon}`);
+      console.log(`Geolocate Coords: ${currentlat} & ${currentlon}`);
       document.getElementById('startlat').value = currentlat;
       document.getElementById('startlon').value = currentlon;
       if (startMarker !== null) {
@@ -358,7 +358,7 @@
       var clickcoords = event.lngLat;
       var currentlat = clickcoords.lat;
       var currentlon = clickcoords.lng;
-      console.log(`Current Coords: ${currentlat} & ${currentlon}`);
+      console.log(`Clicked Coords: ${currentlat} & ${currentlon}`);
       document.getElementById('startlat').value = currentlat;
       document.getElementById('startlon').value = currentlon;
       if (startMarker !== null) {
@@ -374,22 +374,14 @@
       })
     });
 
-    // Add marker to map when coordinates submitted
-    function addMarker(coord) {
-      const startcoord = document.getElementById('start');
-      console.log(`Coordinates Submitted: ${startcoord}`)
-      new mapboxgl.Marker()
-        .setcoord(startcoord)
-        .addTo(map);
-    }
-
     // Get variables from form
     const submitButton = document.getElementById('submit');
 
     // Action after submit button
     submitButton.addEventListener('click', async () => {
-      const latinput = document.getElementById('startlat');
-      const loninput = document.getElementById('startlon');
+      console.log("Submit Button Clicked")
+      const latinput = document.getElementById('startlat').value;
+      const loninput = document.getElementById('startlon').value;
       const targetDistance = parseFloat(document.getElementById('distance').value);
       const routeType = document.getElementById('type').value;
       const avoidHighways = document.getElementById('highway').checked;
