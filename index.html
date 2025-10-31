@@ -241,7 +241,6 @@
     function generateLoopWaypointsCircle(startLat, startLon, radiusMiles, numPoints = 3) {
       const waypoints = [];
       for (let i = 0; i < numPoints; i++) {
-        // Spread angles evenly around a circle + small random offset
         const angle = (i / numPoints) * 2 * Math.PI + (Math.random() * Math.PI / 8 - Math.PI / 16);
         const milesPerDegreeLat = 110.574 / 1.60934;
         const milesPerDegreeLon = (111.320 / 1.60934) * Math.cos(startLat * Math.PI / 180);
