@@ -229,7 +229,7 @@
       // Offsets in miles
       const deltaLat = (Math.sin(randomAngle) * distanceMiles) / milesPerDegreeLat;
       const deltaLon = (Math.cos(randomAngle) * distanceMiles) / milesPerDegreeLon;
-
+      console.log("Random Point:", [startLon + deltaLon, startLat + deltaLat])
       return [startLon + deltaLon, startLat + deltaLat];
     }
 
@@ -267,6 +267,7 @@
       while (routeDifferenceMiles > 0.2 && attemptCount < maxAttempts) { // ±0.2 mile tolerance
         // Step 1: Random destination
         const randomPoint = randomDestination(startLat, startLon, estimatedRadiusMiles);
+        console.log("Random Point:", randomPoint)
 
         // Step 2: Coordinates array for ORS
         const routeCoordinates = routeType === 'loop'
