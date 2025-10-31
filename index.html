@@ -186,12 +186,12 @@
           <label>Route Type:</label>
           <div class="radio-subbox">
             <div class="radio-label">
-            <input type="radio" id="oneway" name="type" value="oneway">
-            <label for="oneway">One Way</label>
+            <input type="radio" id="type" name="type" value="oneway">
+            <label for="type">One Way</label>
             </div>
             <div class="radio-label">
-            <input type="radio" id="loop" name="type" value="loop">
-            <label for="loop">Loop</label>
+            <input type="radio" id="type" name="type" value="loop">
+            <label for="type">Loop</label>
             </div>
           </div>
         </div>
@@ -346,10 +346,9 @@
       if (startMarker !== null) {
         startMarker.remove();
       }
-      const latcoord = currentlat.value;
-      const loncoord = currentlon.value;
+
       startMarker = new mapboxgl.Marker()
-        .setLngLat([loncoord, latcoord])
+        .setLngLat([currentlon, currentlat])
         .addTo(map);
     });
 
