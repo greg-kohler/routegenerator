@@ -396,12 +396,12 @@
       if (!routeGeoJSON) return;
 
       // Remove previous route + arrows if they exist
+      if (map.getLayer('route-arrows')) {
+        map.removeLayer('route-arrows');
+      }
       if (map.getLayer('route')) {
         map.removeLayer('route');
         map.removeSource('route');
-      }
-      if (map.getLayer('route-arrows')) {
-        map.removeLayer('route-arrows');
       }
 
       // Add new route source + main line
