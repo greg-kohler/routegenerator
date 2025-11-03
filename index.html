@@ -347,7 +347,6 @@
       let attemptCount = 0;
       const maxAttempts = 8;
       let bestRouteGeoJSON = null;
-      let actualRouteMiles = null;
 
       while (routeDifferenceMiles > (targetDistanceMiles * 0.1) && attemptCount < maxAttempts) {
         let routeCoordinates;
@@ -388,7 +387,7 @@
         attemptCount++;
       }
 
-      return [bestRouteGeoJSON, actualRouteMiles];
+      return bestRouteGeoJSON;
     }
 
 
@@ -505,9 +504,8 @@
       startMarker = new mapboxgl.Marker()
         .setLngLat([lonInput, latInput])
         .addTo(map);
-      const routeInfo = await generateRouteToMatchDistance(latInput, lonInput, targetDistance, routeType, avoidHighways);
-      const routeGeoJSON = routeInfo[0];
-      const routeLength = routeInfo[1];
+      const routeGeoJSON = await generateRouteToMatchDistance(latInput, lonInput, targetDistance, routeType, avoidHighways);
+      const routeLength = routeGeoJSON.properties.summary.distance / 1609.34;
       displayRouteOnMap(routeGeoJSON);
       console.log(routeLength);
 
