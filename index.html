@@ -186,11 +186,11 @@
           <label>Route Type:</label>
           <div class="radio-subbox">
             <div class="radio-label">
-              <input type="radio" id="type" name="type" value="oneway">
+              <input type="radio" id="type-oneway" name="type" value="oneway">
               <label for="type">One Way</label>
             </div>
             <div class="radio-label">
-              <input type="radio" id="type" name="type" value="loop">
+              <input type="radio" id="type-loop" name="type" value="loop">
               <label for="type">Loop</label>
             </div>
           </div>
@@ -200,7 +200,7 @@
           <input type="checkbox" id="highway" name="highway" value="highway">
         </div>
       </div>
-      <button id="submit" class="btn btn-primary" type="button" onclick="addMarker">Calculate Route</button>
+      <button id="submit" class="btn btn-primary" type="button">Calculate Route</button>
     </div>
   </div>
   <script>
@@ -330,7 +330,8 @@
 
         if (routeType === 'loop') {
           const segmentDistance = targetDistanceMiles / loopPoints;
-          const loopWaypoints = generateLoopWaypointsFixed(startLat, startLon, segmentDistance, loopPoints);
+          const loopWaypoints = generateLoopWaypointsCircle(startLat, startLon, estimatedRadiusMiles, loopPoints);
+
 
           routeCoordinates = [
             [Number(startLon), Number(startLat)],
@@ -455,7 +456,7 @@
       const latInput = Number(document.getElementById('startlat').value);
       const lonInput = Number(document.getElementById('startlon').value);
       const targetDistance = parseFloat(document.getElementById('distance').value);
-      const routeType = document.getElementById('type').value;
+      const routeType = document.querySelector('input[name="type"]:checked').value;
       const avoidHighways = document.getElementById('highway').checked;
       if (startMarker !== null) {
         startMarker.remove();
