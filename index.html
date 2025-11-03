@@ -347,6 +347,7 @@
       let attemptCount = 0;
       const maxAttempts = 8;
       let bestRouteGeoJSON = null;
+      let actualRouteMiles = null;
 
       while (routeDifferenceMiles > (targetDistanceMiles * 0.1) && attemptCount < maxAttempts) {
         let routeCoordinates;
@@ -508,6 +509,7 @@
       const routeGeoJSON = routeInfo[0];
       const routeLength = routeInfo[1];
       displayRouteOnMap(routeGeoJSON);
+      console.log(routeLength);
 
     });
 
