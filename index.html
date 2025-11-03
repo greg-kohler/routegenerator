@@ -278,7 +278,6 @@
       return waypoints;
     }
 
-
     // Add debug markers for loop or one-way waypoints
     function addDebugWaypoints(map, waypoints) {
       waypoints.forEach((coord, i) => {
@@ -288,7 +287,6 @@
           .addTo(map);
       });
     }
-
 
     // Function to call OpenRouteService API
     async function callORS(coordinates, avoidHighways) {
@@ -370,7 +368,6 @@
         attemptCount++;
       }
 
-
       return bestRouteGeoJSON;
     }
 
@@ -393,6 +390,20 @@
           'line-width': 4
         }
       });
+      map.addLayer({
+        id: 'route-arrows',
+        type: 'symbol',
+        source: 'route',
+        layout: {
+          'symbol-placement': 'line',
+          'symbol-spacing': 40, // how often arrows appear
+          'icon-image': 'arrow-icon', // must add this image
+          'icon-size': 0.6,
+          'icon-rotate': 0,
+        },
+        paint: {}
+      });
+
 
       // Fit map to route bounds
       const coords = routeGeoJSON.geometry.coordinates;
@@ -453,6 +464,10 @@
     // Action after submit button
     submitButton.addEventListener('click', async () => {
       console.log("Submit Button Clicked")
+      map.loadImage('https://docs.mapbox.com/mapbox-gl-js/assets/arrow.png', (error, image) => {
+        if (error) throw error;
+        map.addImage('arrow-icon', image);
+      });
       const latInput = Number(document.getElementById('startlat').value);
       const lonInput = Number(document.getElementById('startlon').value);
       const targetDistance = parseFloat(document.getElementById('distance').value);
