@@ -199,6 +199,7 @@
           <label for="highway">Avoid Highways?</label>
           <input type="checkbox" id="highway" name="highway" value="highway">
         </div>
+        <p id="actualLength"></p>
       </div>
       <button id="submit" class="btn btn-primary" type="button">Calculate Route</button>
     </div>
@@ -259,6 +260,12 @@
       }
       return waypoints;
     }
+
+    function updateLengthText(actualLength) {
+      const actualLengthElem = document.getElementById("actualLength");
+      actualLengthElem.textContent = "Actual Route Length: " + actualLength
+    }
+
 
     function generateLoopWaypointsFixed(startLat, startLon, segmentDistance, numPoints = 3) {
       const waypoints = [];
@@ -508,6 +515,7 @@
       const routeLength = routeGeoJSON.properties.summary.distance / 1609.34;
       displayRouteOnMap(routeGeoJSON);
       console.log(routeLength);
+      updateLengthText(actualLength);
 
     });
 
