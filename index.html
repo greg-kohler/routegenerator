@@ -213,6 +213,13 @@
       center: [-93.2010, 44.9375],
       zoom: 10
     });
+    map.loadImage('https://docs.mapbox.com/mapbox-gl-js/assets/arrow.png', (error, image) => {
+      if (error) throw error;
+      if (!map.hasImage('arrow-icon')) {
+        map.addImage('arrow-icon', image);
+      }
+    });
+
 
     // API Key
     const ORS_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImEyNjk3YjQ5M2QwNTRjZTNiZTZiNzJkZDY5NmM4Y2E0IiwiaCI6Im11cm11cjY0In0=';
@@ -278,6 +285,24 @@
       return waypoints;
     }
 
+    function generateLoopWaypointsNonOverlapping(startLat, startLon, distanceMiles, loopPoints = 3) {
+      const radius = distanceMiles / 2.5; // roughly half distance outward
+      const waypoints = [];
+
+      const baseAngle = Math.random() * 2 * Math.PI; // random starting direction
+
+      for (let i = 0; i < loopPoints; i++) {
+        // Spread points around the circle but not symmetrically
+        const angle = baseAngle + (i * (Math.PI * 1.2 / loopPoints)) + (Math.random() * 0.2);
+        const latOffset = (radius / 69) * Math.cos(angle); // ~69 miles per degree latitude
+        const lonOffset = (radius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle);
+        waypoints.push([startLon + lonOffset, startLat + latOffset]);
+      }
+
+      return waypoints;
+    }
+
+
     // Add debug markers for loop or one-way waypoints
     function addDebugWaypoints(map, waypoints) {
       waypoints.forEach((coord, i) => {
@@ -313,24 +338,21 @@
 
     // Main function to generate route to match target distance
     async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, avoidHighways) {
-      const loopPoints = 3;  // number of waypoints for loop
+      const loopPoints = 3; // number of intermediate points for loop
       let estimatedRadiusMiles = routeType === 'loop'
-        ? targetDistanceMiles / (2) // initial guess for loops
-        : targetDistanceMiles;                   // full distance for one-way
+        ? targetDistanceMiles / 2.5   // for loops, go out about halfway
+        : targetDistanceMiles;        // for one-way, full distance
 
       let routeDifferenceMiles = Infinity;
       let attemptCount = 0;
-      const maxAttempts = 10;  // more attempts for loops
+      const maxAttempts = 8;
       let bestRouteGeoJSON = null;
 
       while (routeDifferenceMiles > (targetDistanceMiles * 0.1) && attemptCount < maxAttempts) {
         let routeCoordinates;
 
         if (routeType === 'loop') {
-          const segmentDistance = targetDistanceMiles / loopPoints;
-          const loopWaypoints = generateLoopWaypointsCircle(startLat, startLon, estimatedRadiusMiles, loopPoints);
-
-
+          const loopWaypoints = generateLoopWaypointsNonOverlapping(startLat, startLon, targetDistanceMiles, loopPoints);
           routeCoordinates = [
             [Number(startLon), Number(startLat)],
             ...loopWaypoints.map(p => p.map(Number)),
@@ -344,10 +366,8 @@
           ];
         }
 
-        // Add all waypoints to the map
         addDebugWaypoints(map, routeCoordinates);
 
-        // Call OpenRouteService
         const orsResponse = await callORS(routeCoordinates, avoidHighways);
 
         if (!orsResponse.features || orsResponse.features.length === 0) {
@@ -360,10 +380,9 @@
         const actualRouteMiles = route.properties.summary.distance / 1609.34;
 
         routeDifferenceMiles = Math.abs(actualRouteMiles - targetDistanceMiles);
-        console.log(`Attempt ${attemptCount + 1}: Route = ${actualRouteMiles.toFixed(2)} miles (target ${targetDistanceMiles} miles)`);
+        console.log(`Attempt ${attemptCount + 1}: ${actualRouteMiles.toFixed(2)} mi (target ${targetDistanceMiles})`);
 
         bestRouteGeoJSON = route;
-
         estimatedRadiusMiles *= targetDistanceMiles / actualRouteMiles;
         attemptCount++;
       }
@@ -371,15 +390,21 @@
       return bestRouteGeoJSON;
     }
 
+
     // Add generated route to map
     function displayRouteOnMap(routeGeoJSON) {
       if (!routeGeoJSON) return;
 
-      if (map.getSource('route')) {
+      // Remove previous route + arrows if they exist
+      if (map.getLayer('route')) {
         map.removeLayer('route');
         map.removeSource('route');
       }
+      if (map.getLayer('route-arrows')) {
+        map.removeLayer('route-arrows');
+      }
 
+      // Add new route source + main line
       map.addSource('route', { type: 'geojson', data: routeGeoJSON });
       map.addLayer({
         id: 'route',
@@ -390,26 +415,29 @@
           'line-width': 4
         }
       });
+
+      // Add direction arrows
       map.addLayer({
         id: 'route-arrows',
         type: 'symbol',
         source: 'route',
         layout: {
           'symbol-placement': 'line',
-          'symbol-spacing': 40, // how often arrows appear
-          'icon-image': 'arrow-icon', // must add this image
-          'icon-size': 0.6,
-          'icon-rotate': 0,
-        },
-        paint: {}
+          'symbol-spacing': 40,
+          'icon-image': 'arrow-icon',
+          'icon-size': 0.6
+        }
       });
 
-
-      // Fit map to route bounds
+      // Fit map to route
       const coords = routeGeoJSON.geometry.coordinates;
-      const bounds = coords.reduce((b, coord) => b.extend(coord), new mapboxgl.LngLatBounds(coords[0], coords[0]));
+      const bounds = coords.reduce(
+        (b, coord) => b.extend(coord),
+        new mapboxgl.LngLatBounds(coords[0], coords[0])
+      );
       map.fitBounds(bounds, { padding: 50 });
     }
+
 
     // Current Location Fetching
     var currentloc = new mapboxgl.GeolocateControl({
@@ -464,10 +492,6 @@
     // Action after submit button
     submitButton.addEventListener('click', async () => {
       console.log("Submit Button Clicked")
-      map.loadImage('https://docs.mapbox.com/mapbox-gl-js/assets/arrow.png', (error, image) => {
-        if (error) throw error;
-        map.addImage('arrow-icon', image);
-      });
       const latInput = Number(document.getElementById('startlat').value);
       const lonInput = Number(document.getElementById('startlon').value);
       const targetDistance = parseFloat(document.getElementById('distance').value);
