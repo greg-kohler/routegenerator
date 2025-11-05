@@ -214,6 +214,8 @@
       center: [-93.2010, 44.9375],
       zoom: 10
     });
+
+    // Load arrow image
     map.loadImage('https://cdn-icons-png.flaticon.com/256/3916/3916837.png', (error, image) => {
       if (error) throw error;
       if (!map.hasImage('arrow-icon')) {
@@ -221,104 +223,8 @@
       }
     });
 
-
-    // API Key
+    // API Key for OpenRouteService
     const ORS_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImEyNjk3YjQ5M2QwNTRjZTNiZTZiNzJkZDY5NmM4Y2E0IiwiaCI6Im11cm11cjY0In0=';
-
-    // Generate random destination point
-    function randomDestination(startLat, startLon, distanceMiles) {
-      // Convert latitude/longitude degrees per mile
-      console.log("startLon type")
-      console.log(typeof startLon)
-      console.log("startLat type")
-      console.log(typeof startLat)
-      const milesPerDegreeLat = 110.574 / 1.60934; // ≈68.73 miles per degree
-      const milesPerDegreeLon = (111.320 / 1.60934) * Math.cos(startLat * Math.PI / 180); // ≈69.19*cos(lat)
-
-      // Random angle in radians
-      const randomAngle = Math.random() * 2 * Math.PI;
-
-      // Offsets in miles
-      const deltaLat = (Math.sin(randomAngle) * distanceMiles) / milesPerDegreeLat;
-      const deltaLon = (Math.cos(randomAngle) * distanceMiles) / milesPerDegreeLon;
-      console.log("Random Point:", [startLon + deltaLon, startLat + deltaLat])
-      return [startLon + deltaLon, startLat + deltaLat];
-    }
-
-    // Generate an array of random points around the start for loops
-    function generateLoopWaypointsCircle(startLat, startLon, radiusMiles, numPoints = 3) {
-      const waypoints = [];
-      for (let i = 0; i < numPoints; i++) {
-        const angle = (i / numPoints) * 2 * Math.PI + (Math.random() * Math.PI / 8 - Math.PI / 16);
-        const milesPerDegreeLat = 110.574 / 1.60934;
-        const milesPerDegreeLon = (111.320 / 1.60934) * Math.cos(startLat * Math.PI / 180);
-
-        const deltaLat = (Math.sin(angle) * radiusMiles) / milesPerDegreeLat;
-        const deltaLon = (Math.cos(angle) * radiusMiles) / milesPerDegreeLon;
-
-        waypoints.push([startLon + deltaLon, startLat + deltaLat]);
-      }
-      return waypoints;
-    }
-
-    function updateLengthText(actualLength) {
-      const actualLengthElem = document.getElementById("actualLength");
-      actualLengthElem.textContent = "Actual Route Length: " + actualLength
-    }
-
-
-    function generateLoopWaypointsFixed(startLat, startLon, segmentDistance, numPoints = 3) {
-      const waypoints = [];
-      let prevLat = startLat;
-      let prevLon = startLon;
-
-      for (let i = 0; i < numPoints; i++) {
-        const angle = Math.random() * 2 * Math.PI;
-        const milesPerDegreeLat = 110.574 / 1.60934;
-        const milesPerDegreeLon = (111.320 / 1.60934) * Math.cos(prevLat * Math.PI / 180);
-
-        const deltaLat = (Math.sin(angle) * segmentDistance) / milesPerDegreeLat;
-        const deltaLon = (Math.cos(angle) * segmentDistance) / milesPerDegreeLon;
-
-        const newLat = prevLat + deltaLat;
-        const newLon = prevLon + deltaLon;
-
-        waypoints.push([newLon, newLat]);
-
-        prevLat = newLat;
-        prevLon = newLon;
-      }
-
-      return waypoints;
-    }
-
-    function generateLoopWaypointsNonOverlapping(startLat, startLon, distanceMiles, loopPoints = 3) {
-      const radius = distanceMiles / 6; // roughly half distance outward
-      const waypoints = [];
-
-      const baseAngle = Math.random() * 2 * Math.PI; // random starting direction
-
-      for (let i = 0; i < loopPoints; i++) {
-        // Spread points around the circle but not symmetrically
-        const angle = baseAngle + (i * (Math.PI * 1.2 / loopPoints)) + (Math.random() * 0.2);
-        const latOffset = (radius / 69) * Math.cos(angle); // ~69 miles per degree latitude
-        const lonOffset = (radius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle);
-        waypoints.push([startLon + lonOffset, startLat + latOffset]);
-      }
-
-      return waypoints;
-    }
-
-
-    // Add debug markers for loop or one-way waypoints
-    function addDebugWaypoints(map, waypoints) {
-      waypoints.forEach((coord, i) => {
-        new mapboxgl.Marker({ color: i === 0 ? 'green' : 'red' }) // start green, others red
-          .setLngLat(coord)
-          .setPopup(new mapboxgl.Popup().setText(`Waypoint ${i}`))
-          .addTo(map);
-      });
-    }
 
     // Function to call OpenRouteService API
     async function callORS(coordinates, avoidHighways) {
@@ -342,22 +248,72 @@
       const data = await response.json();
       return data;
     }
+    // Generate random destination point
+    function randomDestination(startLat, startLon, distanceMiles) {
+      // Convert latitude/longitude degrees per mile
+      const milesPerDegreeLat = 110.574 / 1.60934;
+      const milesPerDegreeLon = (111.320 / 1.60934) * Math.cos(startLat * Math.PI / 180);
+
+      // Random angle away from start in radians
+      const randomAngle = Math.random() * 2 * Math.PI;
+
+      // Offsets in miles
+      const deltaLat = (Math.sin(randomAngle) * distanceMiles) / milesPerDegreeLat;
+      const deltaLon = (Math.cos(randomAngle) * distanceMiles) / milesPerDegreeLon;
+      console.log("Random Point:", [startLon + deltaLon, startLat + deltaLat])
+
+      // Return random point coordinates
+      return [startLon + deltaLon, startLat + deltaLat];
+    }
+
+    // Generate a loop of waypoints
+    function generateLoopWaypointsNonOverlapping(startLat, startLon, distanceMiles, loopPoints) {
+      const radius = distanceMiles / (loopPoints * 2);
+      const waypoints = [];
+
+      // Random angle away from start in radians
+      const randomAngle = Math.random() * 2 * Math.PI;
+
+      for (let i = 0; i < loopPoints; i++) {
+        // Spread points around the circle but not symmetrically
+        const angle = randomAngle + (i * (Math.PI * 1.2 / loopPoints)) + (Math.random() * 0.2);
+        const latOffset = (radius / 69) * Math.cos(angle); // ~69 miles per degree latitude
+        const lonOffset = (radius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle);
+        waypoints.push([startLon + lonOffset, startLat + latOffset]);
+      }
+
+      return waypoints;
+    }
+
+    // Add debug markers for loop or one-way waypoints
+    function addDebugWaypoints(map, waypoints) {
+      waypoints.forEach((coord, i) => {
+        new mapboxgl.Marker({ color: i === 0 ? 'green' : 'red' }) // start green, others red
+          .setLngLat(coord)
+          .setPopup(new mapboxgl.Popup().setText(`Waypoint ${i}`))
+          .addTo(map);
+      });
+    }
 
     // Main function to generate route to match target distance
     async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, avoidHighways) {
-      const loopPoints = 3; // number of intermediate points for loop
-      let estimatedRadiusMiles = routeType === 'loop'
-        ? targetDistanceMiles / 6   // for loops, go out about halfway
-        : targetDistanceMiles;        // for one-way, full distance
+      const loopPoints = 3;
+      let estimatedMiles = routeType === 'loop'
+        // Loop distance
+        ? targetDistanceMiles / (loopPoints * 2)
+        // Oneway distance
+        : targetDistanceMiles;  
 
+      // Establish variables
       let routeDifferenceMiles = Infinity;
       let attemptCount = 0;
-      const maxAttempts = 8;
+      const maxAttempts = 10; // Max route generations
       let bestRouteGeoJSON = null;
 
+      // Generate route until one is within 10% of the goal
       while (routeDifferenceMiles > (targetDistanceMiles * 0.1) && attemptCount < maxAttempts) {
         let routeCoordinates;
-
+        // If loop selected, generate the waypoints
         if (routeType === 'loop') {
           const loopWaypoints = generateLoopWaypointsNonOverlapping(startLat, startLon, targetDistanceMiles, loopPoints);
           routeCoordinates = [
@@ -365,8 +321,9 @@
             ...loopWaypoints.map(p => p.map(Number)),
             [Number(startLon), Number(startLat)]
           ];
+        // Otherwise make one-way
         } else {
-          const randomPoint = randomDestination(startLat, startLon, estimatedRadiusMiles);
+          const randomPoint = randomDestination(startLat, startLon, estimatedMiles);
           routeCoordinates = [
             [Number(startLon), Number(startLat)],
             randomPoint.map(Number)
@@ -374,29 +331,30 @@
         }
 
         addDebugWaypoints(map, routeCoordinates);
-
+        // Generate route using ORS API with waypoints
         const orsResponse = await callORS(routeCoordinates, avoidHighways);
 
+        // Catch if no route can be made
         if (!orsResponse.features || orsResponse.features.length === 0) {
-          console.warn("No route returned, retrying...");
+          console.warn("No route returned. Trying again.");
           attemptCount++;
           continue;
         }
 
+        // Get route length as variable (in miles)
         const route = orsResponse.features[0];
         const actualRouteMiles = route.properties.summary.distance / 1609.34;
 
+        // Calculate delta
         routeDifferenceMiles = Math.abs(actualRouteMiles - targetDistanceMiles);
         console.log(`Attempt ${attemptCount + 1}: ${actualRouteMiles.toFixed(2)} mi (target ${targetDistanceMiles})`);
 
-        bestRouteGeoJSON = route;
-        estimatedRadiusMiles *= targetDistanceMiles / actualRouteMiles;
+        estimatedMiles *= targetDistanceMiles / actualRouteMiles;
         attemptCount++;
       }
 
-      return bestRouteGeoJSON;
+      return route;
     }
-
 
     // Add generated route to map
     function displayRouteOnMap(routeGeoJSON) {
@@ -418,7 +376,7 @@
         type: 'line',
         source: 'route',
         paint: {
-          'line-color': '#ff5733',
+          'line-color': '#1E5599',
           'line-width': 4
         }
       });
@@ -444,9 +402,9 @@
       );
       map.fitBounds(bounds, { padding: 50 });
     }
+    // Actual Running of Script
 
-
-    // Current Location Fetching
+    // Add current location tool
     var currentloc = new mapboxgl.GeolocateControl({
       positionOptions: {
         enableHighAccuracy: true
@@ -458,42 +416,42 @@
 
     // Get current coords and add to form and marker
     currentloc.on('geolocate', (event) => {
-      var currentlat = event.coords.latitude;
-      var currentlon = event.coords.longitude;
-      console.log(`Geolocate Coords: ${currentlat} & ${currentlon}`);
-      document.getElementById('startlat').value = currentlat;
-      document.getElementById('startlon').value = currentlon;
+      var currentLat = event.coords.latitude;
+      var currentLon = event.coords.longitude;
+      console.log(`Geolocate Coords: ${currentLat} & ${currentLon}`);
+      document.getElementById('startlat').value = currentLat;
+      document.getElementById('startlon').value = currentLon;
       if (startMarker !== null) {
         startMarker.remove();
       }
 
       startMarker = new mapboxgl.Marker()
-        .setLngLat([currentlon, currentlat])
+        .setLngLat([currentLon, currentLat])
         .addTo(map);
     });
 
-    // Or get coords based on click
+    // Get coords based on click
     map.on('click', (event) => {
       var clickcoords = event.lngLat;
-      var currentlat = clickcoords.lat;
-      var currentlon = clickcoords.lng;
-      console.log(`Clicked Coords: ${currentlat} & ${currentlon}`);
-      document.getElementById('startlat').value = currentlat;
-      document.getElementById('startlon').value = currentlon;
+      var currentLat = clickcoords.lat;
+      var currentLon = clickcoords.lng;
+      console.log(`Clicked Coords: ${currentLat} & ${currentLon}`);
+      document.getElementById('startlat').value = currentLat;
+      document.getElementById('startlon').value = currentLon;
       if (startMarker !== null) {
         startMarker.remove();
       }
       startMarker = new mapboxgl.Marker()
-        .setLngLat([currentlon, currentlat])
+        .setLngLat([currentLon, currentLat])
         .addTo(map);
       map.flyTo({
-        center: [currentlon, currentlat],
+        center: [currentLon, currentLat],
         zoom: 11,
         essential: true
       })
     });
 
-    // Get variables from form
+    // Get calculate button
     const submitButton = document.getElementById('submit');
 
     // Action after submit button
