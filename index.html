@@ -292,16 +292,6 @@
       return waypoints;
     }
 
-    // Add debug markers for loop or one-way waypoints
-    function addDebugWaypoints(map, waypoints) {
-      waypoints.forEach((coord, i) => {
-        new mapboxgl.Marker({ color: i === 0 ? 'green' : 'red' }) // start green, others red
-          .setLngLat(coord)
-          .setPopup(new mapboxgl.Popup().setText(`Waypoint ${i}`))
-          .addTo(map);
-      });
-    }
-
     // Main function to generate route to match target distance
     async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, avoidHighways) {
       const loopPoints = 3;
@@ -337,7 +327,6 @@
           ];
         }
 
-        addDebugWaypoints(map, routeCoordinates);
         // Generate route using ORS API with waypoints
         const orsResponse = await callORS(routeCoordinates, avoidHighways);
 
@@ -418,10 +407,8 @@
       if (!routeGeoJSON || !routeGeoJSON.geometry || !routeGeoJSON.geometry.coordinates) return;
 
       const coords = routeGeoJSON.geometry.coordinates;
-      const totalDistanceMeters = routeGeoJSON.properties.summary.distance;
-      const totalMiles = totalDistanceMeters / 1609.34;
+      const totalMiles = turf.length(routeGeoJSON, { units: 'miles' });
 
-      // Prepare GeoJSON for markers
       const mileMarkers = {
         type: "FeatureCollection",
         features: []
@@ -434,22 +421,18 @@
         const [lon1, lat1] = coords[i - 1];
         const [lon2, lat2] = coords[i];
 
-        const segmentMeters = turf.distance([lon1, lat1], [lon2, lat2], { units: 'meters' });
-        accumulated += segmentMeters;
+        // segment distance in miles
+        const segmentMiles = turf.distance([lon1, lat1], [lon2, lat2], { units: 'miles' });
+        accumulated += segmentMiles;
 
-        const currentMiles = accumulated / 1609.34;
-        if (currentMiles >= targetMiles) {
-          // Interpolate approximate marker position
-          const ratio = (targetMiles * 1609.34 - (accumulated - segmentMeters)) / segmentMeters;
+        if (accumulated >= targetMiles) {
+          const ratio = (targetMiles - (accumulated - segmentMiles)) / segmentMiles;
           const lon = lon1 + (lon2 - lon1) * ratio;
           const lat = lat1 + (lat2 - lat1) * ratio;
 
           mileMarkers.features.push({
             type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: [lon, lat]
-            },
+            geometry: { type: "Point", coordinates: [lon, lat] },
             properties: { label: `${targetMiles}` }
           });
 
@@ -457,13 +440,11 @@
         }
       }
 
-      // Remove existing markers if needed
       if (map.getSource('mile-markers')) {
         map.removeLayer('mile-marker-labels');
         map.removeSource('mile-markers');
       }
 
-      // Add new layer for mile markers
       map.addSource('mile-markers', { type: 'geojson', data: mileMarkers });
       map.addLayer({
         id: 'mile-marker-labels',
@@ -558,7 +539,7 @@
       displayRouteOnMap(routeGeoJSON);
       console.log(routeLength);
       // Change actual route length value
-      actualLengthElem.textContent = "Route Length: " + actualLength
+      actualLengthElem.textContent = "Route Length: " + routeLength
     });
 
   </script>
