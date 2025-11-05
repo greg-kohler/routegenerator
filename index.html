@@ -6,6 +6,7 @@
   <title>Route Generator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.css" rel="stylesheet" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -137,6 +138,10 @@
       padding-left: 1vw;
     }
 
+    .length {
+      font-weight: bold;
+    }
+
     @media (orientation: portrait) {
 
       .input-box,
@@ -199,7 +204,9 @@
           <label for="highway">Avoid Highways?</label>
           <input type="checkbox" id="highway" name="highway" value="highway">
         </div>
-        <p id="actualLength"></p>
+      </div>
+      <div>
+        <p class="length" id="actualLength"></p>
       </div>
       <button id="submit" class="btn btn-primary" type="button">Calculate Route</button>
     </div>
@@ -401,13 +408,82 @@
         new mapboxgl.LngLatBounds(coords[0], coords[0])
       );
       map.fitBounds(bounds, { padding: 50 });
+
+      // Add mile markers
+      addMileMarkers(map, routeGeoJSON);
     }
 
-    // Function to show route length 
-    function updateLengthText(actualLength) {
-      const actualLengthElem = document.getElementById("actualLength");
-      actualLengthElem.textContent = "Actual Route Length: " + actualLength
+    // Add mile markers along the route
+    function addMileMarkers(map, routeGeoJSON) {
+      if (!routeGeoJSON || !routeGeoJSON.geometry || !routeGeoJSON.geometry.coordinates) return;
+
+      const coords = routeGeoJSON.geometry.coordinates;
+      const totalDistanceMeters = routeGeoJSON.properties.summary.distance;
+      const totalMiles = totalDistanceMeters / 1609.34;
+
+      // Prepare GeoJSON for markers
+      const mileMarkers = {
+        type: "FeatureCollection",
+        features: []
+      };
+
+      let accumulated = 0;
+      let targetMiles = 1;
+
+      for (let i = 1; i < coords.length; i++) {
+        const [lon1, lat1] = coords[i - 1];
+        const [lon2, lat2] = coords[i];
+
+        const segmentMeters = turf.distance([lon1, lat1], [lon2, lat2], { units: 'meters' });
+        accumulated += segmentMeters;
+
+        const currentMiles = accumulated / 1609.34;
+        if (currentMiles >= targetMiles) {
+          // Interpolate approximate marker position
+          const ratio = (targetMiles * 1609.34 - (accumulated - segmentMeters)) / segmentMeters;
+          const lon = lon1 + (lon2 - lon1) * ratio;
+          const lat = lat1 + (lat2 - lat1) * ratio;
+
+          mileMarkers.features.push({
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [lon, lat]
+            },
+            properties: { label: `${targetMiles}` }
+          });
+
+          targetMiles += 1;
+        }
+      }
+
+      // Remove existing markers if needed
+      if (map.getSource('mile-markers')) {
+        map.removeLayer('mile-marker-labels');
+        map.removeSource('mile-markers');
+      }
+
+      // Add new layer for mile markers
+      map.addSource('mile-markers', { type: 'geojson', data: mileMarkers });
+      map.addLayer({
+        id: 'mile-marker-labels',
+        type: 'symbol',
+        source: 'mile-markers',
+        layout: {
+          'text-field': ['get', 'label'],
+          'text-size': 12,
+          'text-offset': [0, -0.6],
+          'text-anchor': 'top',
+          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold']
+        },
+        paint: {
+          'text-color': '#000',
+          'text-halo-color': '#fff',
+          'text-halo-width': 1.5
+        }
+      });
     }
+
 
     // Actual Running of Script
 
@@ -469,6 +545,7 @@
       const targetDistance = parseFloat(document.getElementById('distance').value);
       const routeType = document.querySelector('input[name="type"]:checked').value;
       const avoidHighways = document.getElementById('highway').checked;
+      const actualLengthElem = document.getElementById("actualLength");
       if (startMarker !== null) {
         startMarker.remove();
       }
@@ -480,8 +557,8 @@
       const routeLength = routeGeoJSON.properties.summary.distance / 1609.34;
       displayRouteOnMap(routeGeoJSON);
       console.log(routeLength);
-      updateLengthText(routeLength);
-
+      // Change actual route length value
+      actualLengthElem.textContent = "Route Length: " + actualLength
     });
 
   </script>
