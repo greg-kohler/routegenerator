@@ -199,7 +199,7 @@
           <label for="highway">Avoid Highways?</label>
           <input type="checkbox" id="highway" name="highway" value="highway">
         </div>
-        <p id="actualLength"></p>
+        <p id="actualLength">Actual Length: 13041.49.</p>
       </div>
       <button id="submit" class="btn btn-primary" type="button">Calculate Route</button>
     </div>
@@ -349,11 +349,12 @@
         routeDifferenceMiles = Math.abs(actualRouteMiles - targetDistanceMiles);
         console.log(`Attempt ${attemptCount + 1}: ${actualRouteMiles.toFixed(2)} mi (target ${targetDistanceMiles})`);
 
+        routeGeoJSON = route;
         estimatedMiles *= targetDistanceMiles / actualRouteMiles;
         attemptCount++;
       }
 
-      return route;
+      return routeGeoJSON;
     }
 
     // Add generated route to map
