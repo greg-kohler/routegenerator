@@ -308,7 +308,7 @@
       let routeDifferenceMiles = Infinity;
       let attemptCount = 0;
       const maxAttempts = 10; // Max route generations
-      let route = null;
+      let routeJSON = null;
 
       // Generate route until one is within 10% of the goal
       while (routeDifferenceMiles > (targetDistanceMiles * 0.1) && attemptCount < maxAttempts) {
@@ -348,12 +348,12 @@
         // Calculate delta
         routeDifferenceMiles = Math.abs(actualRouteMiles - targetDistanceMiles);
         console.log(`Attempt ${attemptCount + 1}: ${actualRouteMiles.toFixed(2)} mi (target ${targetDistanceMiles})`);
-
         estimatedMiles *= targetDistanceMiles / actualRouteMiles;
         attemptCount++;
+        routeJSON = route;
       }
 
-      return route;
+      return routeJSON;
     }
 
     // Add generated route to map
@@ -408,7 +408,7 @@
       const actualLengthElem = document.getElementById("actualLength");
       actualLengthElem.textContent = "Actual Route Length: " + actualLength
     }
-    
+
     // Actual Running of Script
 
     // Add current location tool
