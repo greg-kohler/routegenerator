@@ -475,8 +475,8 @@
       console.log("Start Elev:", coordsData[0][2]);
       console.log("End Elev:", coordsData[coordsData.length - 1][2]);
 
-      // Take every 5th point to reduce noise
-      const step = 5;
+      // Take every 3rd point to reduce noise
+      const step = 3;
       const smoothed = coordsData.filter((_, i) => i % step === 0);
 
       let totalGain = 0;
@@ -568,6 +568,14 @@
         .addTo(map);
       const routeGeoJSON = await generateRouteToMatchDistance(latInput, lonInput, targetDistance, routeType, avoidHighways);
       const elevationData = routeGeoJSON.geometry.coordinates;
+      // Log the start and end points
+      const start = elevationData[0];
+      const end = elevationData[elevationData.length - 1];
+
+      console.log("Start point:", start);
+      console.log("End point:", end);
+      console.log("Start elevation (m):", start[2]);
+      console.log("End elevation (m):", end[2]);
       const elevationGain = calculateElevation(elevationData);
       const routeLength = routeGeoJSON.properties.summary.distance / 1609.34;
       displayRouteOnMap(routeGeoJSON);
