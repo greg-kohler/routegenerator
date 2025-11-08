@@ -471,23 +471,30 @@
     }
 
     function calculateElevation(coordsData) {
-      let totalGain = 0;
-      let totalLoss = 0;
-      let minElev = coordsData[0][2];
-      let maxElev = coordsData[0][2];
+      if (!coordsData || coordsData.length < 2) return 0;
 
-      for (let i = 1; i < coordsData.length; i++) {
-        const previous = coordsData[i - 1][2];
-        const current = coordsData[i][2];
+      // Take every 5th point to reduce noise
+      const step = 5;
+      const smoothed = coordsData.filter((_, i) => i % step === 0);
+
+      let totalGain = 0;
+
+      for (let i = 1; i < smoothed.length; i++) {
+        const previous = smoothed[i - 1][2];
+        const current = smoothed[i][2];
         const difference = current - previous;
 
+        // Only add uphill elevation gain
         if (difference > 0) totalGain += difference;
-
-        //  if (current > maxElev) maxElev = current;
-        //  if (current < minElev) minElev = current;
       }
-      return totalGain.toFixed(1)
+
+      // Convert Meters to Feet
+      const meterToFeet = 3.28084;
+      totalGain *= MeterToFeet;
+
+      return totalGain.toFixed(0); // nearest whole foot
     }
+
 
 
     // Actual Running of Script
