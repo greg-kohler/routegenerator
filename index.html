@@ -472,6 +472,8 @@
 
     function calculateElevation(coordsData) {
       if (!coordsData || coordsData.length < 2) return 0;
+      console.log("Start Elev:", coordsData[0][2]);
+      console.log("End Elev:", coordsData[coordsData.length - 1][2]);
 
       // Take every 5th point to reduce noise
       const step = 5;
@@ -491,7 +493,6 @@
       // Convert Meters to Feet
       const meterToFeet = 3.28084;
       totalGain *= meterToFeet;
-
       return totalGain.toFixed(0); // nearest whole foot
     }
 
