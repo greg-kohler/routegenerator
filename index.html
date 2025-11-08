@@ -240,7 +240,9 @@
         coordinates: coordinates,
         elevation: true,
         format: 'geojson',
-        options: {}
+        options: {
+          avoid_features: avoidHighways ? ['highways'] : []
+        }
       };
 
       // Only include avoid polygons if requested and loaded
@@ -248,7 +250,7 @@
         requestBody.options.avoid_polygons = highwayAvoidPolygon;
       }
 
-      const response = await fetch('https://api.openrouteservice.org/v2/directions/foot-walking/geojson', {
+      const response = await fetch('https://api.openrouteservice.org/v2/directions/foot-walking/json', {
         method: 'POST',
         headers: {
           'Authorization': ORS_KEY,
