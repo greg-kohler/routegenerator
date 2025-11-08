@@ -277,7 +277,7 @@
     loadHighways();
 
     // Function to subset highways around start point
-    function getHighwaysSubset(startLon, startLat, bufferMiles = 5) {
+    function getHighwaysSubset(startLon, startLat, bufferMiles = 1) {
       if (!highwayFullGeoJSON) return null;
 
       // Convert miles to degrees approx
