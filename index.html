@@ -296,7 +296,7 @@
 
     // Main function to generate route to match target distance
     async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, routeComplex) {
-      const loopPoints = routeComplex * 3;
+      const loopPoints = routeComplex * 2;
       let estimatedMiles = routeType === 'loop'
         // Loop distance
         ? targetDistanceMiles / (loopPoints * 2)
