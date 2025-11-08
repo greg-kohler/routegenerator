@@ -201,8 +201,8 @@
           </div>
         </div>
         <div class="radio-label">
-          <label for="highway">Avoid Highways?</label>
-          <input type="checkbox" id="highway" name="highway" value="highway">
+          <label for="highway">Route Complexity:</label>
+          <input type="range" id="complex" name="complex" value="complex">
         </div>
       </div>
       <div>
@@ -236,21 +236,13 @@
 
     // Function to call OpenRouteService API
     // Updated callORS to use subset
-    async function callORS(coordinates, avoidHighways, startLon, startLat) {
+    async function callORS(coordinates) {
       const requestBody = {
         coordinates: coordinates,
         elevation: true,
         format: 'geojson',
         options: {}
       };
-
-      if (avoidHighways) {
-        const subsetPolygon = getHighwaysSubset(startLon, startLat, 5); // 5 mile buffer
-        const simplified = turf.simplify(subsetPolygon, { tolerance: 0.001, highQuality: false });
-        if (subsetPolygon) {
-          requestBody.options.avoid_polygons = simplified;
-        }
-      }
 
       const response = await fetch('https://api.openrouteservice.org/v2/directions/foot-walking/geojson', {
         method: 'POST',
@@ -263,44 +255,6 @@
 
       const data = await response.json();
       return data;
-    }
-
-    // Load the full highways file once on page load
-    async function loadHighways() {
-      try {
-        const response = await fetch('simple_highways.geojson');
-        highwayFullGeoJSON = await response.json();
-        console.log("Full highway network loaded");
-      } catch (err) {
-        console.error("Failed to load highways:", err);
-      }
-    }
-    loadHighways();
-
-    // Function to subset highways around start point
-    function getHighwaysSubset(startLon, startLat, bufferMiles = 1) {
-      if (!highwayFullGeoJSON) return null;
-
-      // Convert miles to degrees approx
-      const milesToDeg = 1 / 69; // very rough for latitude
-      const bufferDeg = bufferMiles * milesToDeg;
-
-      const startPoint = turf.point([startLon, startLat]);
-      const bbox = [
-        startLon - bufferDeg,
-        startLat - bufferDeg,
-        startLon + bufferDeg,
-        startLat + bufferDeg
-      ];
-
-      const subsetFeatures = highwayFullGeoJSON.features.filter(f => {
-        const geom = f.geometry;
-        const featureBBox = turf.bbox(f);
-        return !(featureBBox[0] > bbox[2] || featureBBox[2] < bbox[0] ||
-          featureBBox[1] > bbox[3] || featureBBox[3] < bbox[1]);
-      });
-
-      return { type: "FeatureCollection", features: subsetFeatures };
     }
 
     // Generate random destination point
@@ -341,7 +295,7 @@
     }
 
     // Main function to generate route to match target distance
-    async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, avoidHighways) {
+    async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType) {
       const loopPoints = 3;
       let estimatedMiles = routeType === 'loop'
         // Loop distance
@@ -376,7 +330,7 @@
         }
 
         // Generate route using ORS API with waypoints
-        const orsResponse = await callORS(routeCoordinates, avoidHighways, startLon, startLat);
+        const orsResponse = await callORS(routeCoordinates);
         // Catch if no route can be made
         if (!orsResponse.features || orsResponse.features.length === 0) {
           console.warn("No route returned. Trying again.");
@@ -555,7 +509,6 @@
     map.addControl(currentloc);
     let startMarker = null;
     let endMarker = null;
-    let highwayAvoidPolygon = null;
 
     // Get current coords and add to form and marker
     currentloc.on('geolocate', (event) => {
@@ -604,7 +557,6 @@
       const lonInput = Number(document.getElementById('startlon').value);
       const targetDistance = parseFloat(document.getElementById('distance').value);
       const routeType = document.querySelector('input[name="type"]:checked').value;
-      const avoidHighways = document.getElementById('highway').checked;
       const actualLengthElem = document.getElementById("actualLength");
       const elevChangeElem = document.getElementById("elevationChange");
       if (startMarker !== null) {
@@ -619,7 +571,7 @@
         .setLngLat([lonInput, latInput])
         .addTo(map);
 
-      const routeGeoJSON = await generateRouteToMatchDistance(latInput, lonInput, targetDistance, routeType, avoidHighways);
+      const routeGeoJSON = await generateRouteToMatchDistance(latInput, lonInput, targetDistance, routeType);
       const coordData = routeGeoJSON.geometry.coordinates;
       const endCoords = coordData[coordData.length - 1];
       const elevationGain = calculateElevation(coordData);
@@ -631,7 +583,6 @@
           .setLngLat([endCoords[0], endCoords[1]])
           .addTo(map);
       }
-
       console.log(routeLength);
       console.log(elevationGain);
       // Change actual route length value
