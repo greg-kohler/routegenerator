@@ -470,15 +470,15 @@
       });
     }
 
-    function calculateElevation(elevationData) {
+    function calculateElevation(coordsData) {
       let totalGain = 0;
       let totalLoss = 0;
-      let minElev = elevationData[0][2];
-      let maxElev = elevationData[0][2];
+      let minElev = coordsData[0][2];
+      let maxElev = coordsData[0][2];
 
-      for (let i = 1; i < coords.length; i++) {
-        const previous = coords[i - 1][2];
-        const current = coords[i][2];
+      for (let i = 1; i < coordsData.length; i++) {
+        const previous = coordsData[i - 1][2];
+        const current = coordsData[i][2];
         const difference = current - previous;
 
         if (difference > 0) totalGain += difference;
@@ -562,7 +562,6 @@
       const elevationData = routeGeoJSON.geometry.coordinates;
       const elevationGain = calculateElevation(elevationData);
       const routeLength = routeGeoJSON.properties.summary.distance / 1609.34;
-
       displayRouteOnMap(routeGeoJSON);
       console.log(routeLength);
       console.log(elevationGain)
