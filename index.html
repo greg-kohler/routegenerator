@@ -201,8 +201,8 @@
           </div>
         </div>
         <div class="radio-label">
-          <label for="highway">Route Complexity:</label>
-          <input type="range" id="complex" name="complex" value="complex">
+          <label for="highway">Route Complexity (Loop Only):</label>
+          <input type="range" min="1" max="5" id="complex" name="complex" value="complex">
         </div>
       </div>
       <div>
@@ -295,8 +295,8 @@
     }
 
     // Main function to generate route to match target distance
-    async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType) {
-      const loopPoints = 3;
+    async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, routeComplex) {
+      const loopPoints = routeComplex * 3;
       let estimatedMiles = routeType === 'loop'
         // Loop distance
         ? targetDistanceMiles / (loopPoints * 2)
@@ -573,7 +573,7 @@
         .setLngLat([lonInput, latInput])
         .addTo(map);
 
-      const routeGeoJSON = await generateRouteToMatchDistance(latInput, lonInput, targetDistance, routeType);
+      const routeGeoJSON = await generateRouteToMatchDistance(latInput, lonInput, targetDistance, routeType, routeComplex);
       const coordData = routeGeoJSON.geometry.coordinates;
       const endCoords = coordData[coordData.length - 1];
       const elevationGain = calculateElevation(coordData);
