@@ -567,18 +567,16 @@
         .setLngLat([lonInput, latInput])
         .addTo(map);
       const routeGeoJSON = await generateRouteToMatchDistance(latInput, lonInput, targetDistance, routeType, avoidHighways);
-      const elevationData = routeGeoJSON.geometry.coordinates;
-      // Log the start and end points
-      const start = elevationData[0];
-      const end = elevationData[elevationData.length - 1];
-
-      console.log("Start point:", start);
-      console.log("End point:", end);
-      console.log("Start elevation (m):", start[2]);
-      console.log("End elevation (m):", end[2]);
-      const elevationGain = calculateElevation(elevationData);
+      const coordData = routeGeoJSON.geometry.coordinates;
+      const endCoords = coordData[coordData.length - 1];
+      const elevationGain = calculateElevation(coordData);
       const routeLength = routeGeoJSON.properties.summary.distance / 1609.34;
       displayRouteOnMap(routeGeoJSON);
+
+      // Add end waypoint
+      const endMarkerRoute = new mapboxgl.Marker({ color: 'orange' })
+        .setLngLat([endPoint[0], endPoint[1]])
+        .addTo(map);
       console.log(routeLength);
       console.log(elevationGain)
       // Change actual route length value
