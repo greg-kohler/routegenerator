@@ -509,6 +509,7 @@
     });
     map.addControl(currentloc);
     let startMarker = null;
+    let endMarker = null;
 
     // Get current coords and add to form and marker
     currentloc.on('geolocate', (event) => {
@@ -562,6 +563,10 @@
       if (startMarker !== null) {
         startMarker.remove();
       }
+      // Remove end waypoint if present
+      if (endMarker !== null) {
+        endMarker.remove();
+      }
       console.log(`Coordinates Submitted: ${latInput} & ${lonInput}`)
       startMarker = new mapboxgl.Marker()
         .setLngLat([lonInput, latInput])
@@ -572,14 +577,13 @@
       const elevationGain = calculateElevation(coordData);
       const routeLength = routeGeoJSON.properties.summary.distance / 1609.34;
       displayRouteOnMap(routeGeoJSON);
-
-      // Add or remove end waypoint
-      if (endMarker !== null) {
-        endMarker.remove();
+      // Add end waypoint if needed
+      if (routeType != loop) {
+        const endMarker = new mapboxgl.Marker({ color: 'orange' })
+          .setLngLat([endCoords[0], endCoords[1]])
+          .addTo(map);
       }
-      const endMarker = new mapboxgl.Marker({ color: 'orange' })
-        .setLngLat([endCoords[0], endCoords[1]])
-        .addTo(map);
+
       console.log(routeLength);
       console.log(elevationGain)
       // Change actual route length value
