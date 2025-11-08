@@ -557,6 +557,8 @@
       const lonInput = Number(document.getElementById('startlon').value);
       const targetDistance = parseFloat(document.getElementById('distance').value);
       const routeType = document.querySelector('input[name="type"]:checked').value;
+      const routeComplex = document.getElementById('complex').value;
+      console.log("Route Complex: " + routeComplex)
       const actualLengthElem = document.getElementById("actualLength");
       const elevChangeElem = document.getElementById("elevationChange");
       if (startMarker !== null) {
