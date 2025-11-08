@@ -239,10 +239,13 @@
         coordinates: coordinates,
         elevation: true,
         format: 'geojson',
-        options: {
-          avoid_features: avoidHighways ? ['highways'] : []
-        }
+        options: {}
       };
+
+      // Only include avoid polygons if requested and loaded
+      if (avoidHighways && highwayAvoidPolygon) {
+        requestBody.options.avoid_polygons = highwayAvoidPolygon;
+      }
 
       const response = await fetch('https://api.openrouteservice.org/v2/directions/foot-walking/geojson', {
         method: 'POST',
@@ -256,6 +259,7 @@
       const data = await response.json();
       return data;
     }
+
 
     // Generate random destination point
     function randomDestination(startLat, startLon, distanceMiles) {
@@ -571,6 +575,17 @@
       startMarker = new mapboxgl.Marker()
         .setLngLat([lonInput, latInput])
         .addTo(map);
+
+      // Load highways if needed
+      if (avoidHighways && !highwayAvoidPolygon) {
+        try {
+          const response = await fetch('simple_highways.geojson');
+          highwayAvoidPolygon = await response.json();
+          console.log("Highway avoid polygon loaded");
+        } catch (error) {
+          console.error("Failed to load highways GeoJSON:", error);
+        }
+      }
       const routeGeoJSON = await generateRouteToMatchDistance(latInput, lonInput, targetDistance, routeType, avoidHighways);
       const coordData = routeGeoJSON.geometry.coordinates;
       const endCoords = coordData[coordData.length - 1];
@@ -579,7 +594,7 @@
       displayRouteOnMap(routeGeoJSON);
       // Add end waypoint if needed
       if (routeType != 'loop') {
-        const endMarker = new mapboxgl.Marker({ color: 'orange' })
+        endMarker = new mapboxgl.Marker({ color: 'orange' })
           .setLngLat([endCoords[0], endCoords[1]])
           .addTo(map);
       }
