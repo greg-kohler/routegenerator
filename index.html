@@ -515,6 +515,7 @@
     map.addControl(currentloc);
     let startMarker = null;
     let endMarker = null;
+    let highwayAvoidPolygon = null;
 
     // Get current coords and add to form and marker
     currentloc.on('geolocate', (event) => {
@@ -559,7 +560,6 @@
     // Action after submit button
     submitButton.addEventListener('click', async () => {
       console.log("Submit Button Clicked")
-      let highwayAvoidPolygon = null;
       const latInput = Number(document.getElementById('startlat').value);
       const lonInput = Number(document.getElementById('startlon').value);
       const targetDistance = parseFloat(document.getElementById('distance').value);
@@ -606,7 +606,7 @@
       console.log(elevationGain);
       // Change actual route length value
       actualLengthElem.textContent = "Route Length: " + routeLength;
-      elevChangeElem.textContent = "Elevation Gain: " + elevationGain;
+      elevChangeElem.textContent = "Elevation Gain: " + elevationGain + " feet";
     });
 
   </script>
