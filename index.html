@@ -250,7 +250,7 @@
         requestBody.options.avoid_polygons = highwayAvoidPolygon;
       }
 
-      const response = await fetch('https://api.openrouteservice.org/v2/directions/foot-walking/json', {
+      const response = await fetch('https://api.openrouteservice.org/v2/directions/foot-walking/geojson', {
         method: 'POST',
         headers: {
           'Authorization': ORS_KEY,
