@@ -237,6 +237,7 @@
     async function callORS(coordinates, avoidHighways) {
       const requestBody = {
         coordinates: coordinates,
+        elevation: true,
         format: 'geojson',
         options: {
           avoid_features: avoidHighways ? ['highways'] : []
@@ -255,6 +256,7 @@
       const data = await response.json();
       return data;
     }
+
     // Generate random destination point
     function randomDestination(startLat, startLon, distanceMiles) {
       // Convert latitude/longitude degrees per mile
@@ -454,18 +456,37 @@
         layout: {
           'text-field': ['get', 'label'],
           'text-size': 18,
-          'text-padding': 8,  
+          'text-padding': 8,
           'text-anchor': 'center',
           'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
           'text-justify': 'center'
         },
         paint: {
           'text-color': '#000',
-          'text-halo-color': '#fff',  
-          'text-halo-width': 8,      
+          'text-halo-color': '#fff',
+          'text-halo-width': 8,
           'text-halo-blur': 3
         }
       });
+    }
+
+    function calculateElevation(elevationData) {
+      let totalGain = 0;
+      let totalLoss = 0;
+      let minElev = elevationData[0][2];
+      let maxElev = elevationData[0][2];
+
+      for (let i = 1; i < coords.length; i++) {
+        const previous = coords[i - 1][2];
+        const current = coords[i][2];
+        const difference = current - previous;
+
+        if (difference > 0) totalGain += difference;
+
+        //  if (current > maxElev) maxElev = current;
+        //  if (current < minElev) minElev = current;
+      }
+      return totalGain.toFixed(1)
     }
 
 
@@ -538,9 +559,13 @@
         .setLngLat([lonInput, latInput])
         .addTo(map);
       const routeGeoJSON = await generateRouteToMatchDistance(latInput, lonInput, targetDistance, routeType, avoidHighways);
+      const elevationData = routeGeoJSON.geometry.coordinates;
+      const elevationGain = calculateElevation(elevationData);
       const routeLength = routeGeoJSON.properties.summary.distance / 1609.34;
+
       displayRouteOnMap(routeGeoJSON);
       console.log(routeLength);
+      console.log(elevationGain)
       // Change actual route length value
       actualLengthElem.textContent = "Route Length: " + routeLength
     });
