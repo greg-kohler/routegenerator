@@ -578,7 +578,7 @@
       const routeLength = routeGeoJSON.properties.summary.distance / 1609.34;
       displayRouteOnMap(routeGeoJSON);
       // Add end waypoint if needed
-      if (routeType != loop) {
+      if (routeType != 'loop') {
         const endMarker = new mapboxgl.Marker({ color: 'orange' })
           .setLngLat([endCoords[0], endCoords[1]])
           .addTo(map);
