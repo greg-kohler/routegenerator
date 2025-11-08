@@ -207,6 +207,7 @@
       </div>
       <div>
         <p class="length" id="actualLength"></p>
+        <p class="length" id="elevationChange"></p>
       </div>
       <button id="submit" class="btn btn-primary" type="button">Calculate Route</button>
     </div>
@@ -558,12 +559,14 @@
     // Action after submit button
     submitButton.addEventListener('click', async () => {
       console.log("Submit Button Clicked")
+      let highwayAvoidPolygon = null;
       const latInput = Number(document.getElementById('startlat').value);
       const lonInput = Number(document.getElementById('startlon').value);
       const targetDistance = parseFloat(document.getElementById('distance').value);
       const routeType = document.querySelector('input[name="type"]:checked').value;
       const avoidHighways = document.getElementById('highway').checked;
       const actualLengthElem = document.getElementById("actualLength");
+      const elevChangeElem = document.getElementById("elevationChange");
       if (startMarker !== null) {
         startMarker.remove();
       }
@@ -600,9 +603,10 @@
       }
 
       console.log(routeLength);
-      console.log(elevationGain)
+      console.log(elevationGain);
       // Change actual route length value
-      actualLengthElem.textContent = "Route Length: " + routeLength
+      actualLengthElem.textContent = "Route Length: " + routeLength;
+      elevChangeElem.textContent = "Elevation Gain: " + elevationGain;
     });
 
   </script>
