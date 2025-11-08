@@ -246,8 +246,9 @@
 
       if (avoidHighways) {
         const subsetPolygon = getHighwaysSubset(startLon, startLat, 5); // 5 mile buffer
+        const simplified = turf.simplify(subsetPolygon, { tolerance: 0.001, highQuality: false });
         if (subsetPolygon) {
-          requestBody.options.avoid_polygons = subsetPolygon;
+          requestBody.options.avoid_polygons = simplified;
         }
       }
 
