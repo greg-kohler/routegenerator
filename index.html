@@ -304,7 +304,7 @@
       const { points, radiusExtra, randomness } = preset;
 
       // inflation factor to compensate for road network (tweakable)
-      const inflation = 1.25 + 0.1 * (complexity - 1);
+      const inflation = 1.1 + 0.1 * (complexity - 1);
 
       // base radius in miles per point
       const radius = (targetDistanceMiles / points) * radiusExtra * inflation;
@@ -358,7 +358,7 @@
       const maxAttempts = Math.min(5 + routeComplex, 8);
       let routeJSON = null;
 
-      while (routeDifferenceMiles > (targetDistanceMiles * 0.1) && attemptCount < maxAttempts) {
+      while (routeDifferenceMiles > (targetDistanceMiles * 0.08) && attemptCount < maxAttempts) {
         let routeCoordinates;
         if (routeType === 'loop') {
           const loopWaypoints = generateLoopWaypointsEnhanced(startLat, startLon, targetDistanceMiles, routeComplex);
