@@ -379,7 +379,11 @@
           const route = orsResponse.features[0];
           const coordData = route.geometry.coordinates;
           const actualRouteMiles = route.properties.summary.distance / 1609.34;
-          const elevationGain = calculateElevation(coordData); // call once
+          const elevationGain = calculateElevation(coordData);
+          // Store route before checking elevation
+          routeGeoJSON = route;
+          finalElevationGain = elevationGain;
+
           routeDifferenceMiles = Math.abs(actualRouteMiles - targetDistanceMiles);
           console.log(`Attempt ${attemptCount + 1}: ${actualRouteMiles.toFixed(2)} mi (target ${targetDistanceMiles})`);
 
@@ -407,8 +411,6 @@
 
           // Adjust estimatedMiles for next attempt
           estimatedMiles *= targetDistanceMiles / actualRouteMiles;
-          routeGeoJSON = route;
-          finalElevationGain = elevationGain;
           attemptCount++;
 
           // Throttle to avoid rate limit
