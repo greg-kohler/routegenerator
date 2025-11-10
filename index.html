@@ -342,8 +342,6 @@
       return waypoints;
     }
 
-
-
     // Generate a loop of waypoints
     function generateLoopWaypointsNonOverlapping(startLat, startLon, distanceMiles, loopPoints) {
       const radius = Math.min(distanceMiles / loopPoints, 10); // no segment longer than ~10 miles
@@ -363,11 +361,38 @@
       return waypoints;
     }
 
+    function generateLoopWaypoints(startLat, startLon, distanceMiles, complexity = 2) {
+      // Clamp complexity between 1 and 5
+      const level = Math.max(1, Math.min(5, Number(complexity)));
+
+      // Map complexity -> number of points
+      const pointsByComplexity = [4, 6, 8, 10, 12]; // index 0 = complexity 1
+      const loopPoints = pointsByComplexity[level - 1];
+
+      const radius = Math.min(distanceMiles / loopPoints, 10); // max ~10 miles per segment
+      const waypoints = [];
+      const randomAngle = Math.random() * 2 * Math.PI;
+      const shakeFactor = 0.002 * level; // small wiggle for realism
+
+      for (let i = 0; i < loopPoints; i++) {
+        const angleNoise = (Math.random() - 0.5) * 0.2 * level;
+        const angle = randomAngle + (i * (Math.PI * 1.2 / loopPoints)) + angleNoise;
+
+        const latOffset = (radius / 69) * Math.cos(angle) + (Math.random() - 0.5) * shakeFactor;
+        const lonOffset = (radius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle) + (Math.random() - 0.5) * shakeFactor;
+
+        waypoints.push([startLon + lonOffset, startLat + latOffset]);
+      }
+
+      return waypoints;
+    }
+
+
+
     // Main function to generate route to match target distance
-    async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, routeComplex) {
-      const loopPoints = (routeComplex * 2);
+    async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType) {
       let estimatedMiles = routeType === 'loop'
-        ? targetDistanceMiles / (loopPoints * 2)
+        ? targetDistanceMiles / 2
         : targetDistanceMiles;
 
       let routeDifferenceMiles = Infinity;
@@ -378,7 +403,7 @@
       while (routeDifferenceMiles > (targetDistanceMiles * 0.08) && attemptCount < maxAttempts) {
         let routeCoordinates;
         if (routeType === 'loop') {
-          const loopWaypoints = generateLoopWaypointsEnhanced(startLat, startLon, targetDistanceMiles, routeComplex);
+          const loopWaypoints = generateLoopWaypoints(startLat, startLon, targetDistanceMiles);
           routeCoordinates = [
             [Number(startLon), Number(startLat)],
             ...loopWaypoints.map(p => p.map(Number)),
