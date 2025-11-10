@@ -391,7 +391,7 @@
             await new Promise(r => setTimeout(r, error.retryAfter * 1000));
             continue;
           } else {
-            console.erroror("ORS request failed:", error);
+            console.error("ORS request failed:", error);
             attemptCount++;
             await new Promise(r => setTimeout(r, 1000));
             continue;
