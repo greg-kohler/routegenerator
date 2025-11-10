@@ -277,10 +277,11 @@
 
     // Generate a loop of waypoints
     function generateLoopWaypointsNonOverlapping(startLat, startLon, distanceMiles, loopPoints) {
+      let radius = null;
       if (loopPoints < 4) {
-        const radius = distanceMiles / (loopPoints * 2);
+        radius = distanceMiles / (loopPoints * 2);
       } else {
-        const radius = distanceMiles/ loopPoints;
+        radius = distanceMiles/ loopPoints;
       }
       
       const waypoints = [];
