@@ -239,7 +239,7 @@
     async function callORS(coordinates) {
       const requestBody = {
         coordinates,
-        elevation: coordinates.length < 10,
+        elevation: true,
         format: 'geojson',
         options: {}
       };
@@ -304,7 +304,7 @@
       const { points, radiusExtra, randomness } = preset;
 
       // inflation factor to compensate for road network (tweakable)
-      const inflation = 1.5 + 0.1 * (complexity - 1);
+      const inflation = 1.25 + 0.1 * (complexity - 1);
 
       // base radius in miles per point
       const radius = (targetDistanceMiles / points) * radiusExtra * inflation;
