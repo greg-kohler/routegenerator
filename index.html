@@ -621,12 +621,12 @@
         latInput, lonInput, targetDistance, routeType, elevationProfile
       );
 
-      if (!result?.routeJSON) {
+      if (!result?.routeGeoJSON) {
         alert("Could not generate a route. Try a different location or distance.");
         return;
       }
 
-      const { routeJSON, elevationGain } = result;
+      const { routeGeoJSON, elevationGain } = result;
 
       const coordData = routeGeoJSON.geometry.coordinates;
       const endCoords = coordData[coordData.length - 1];
