@@ -298,7 +298,8 @@
       };
       const preset = presets[routeComplex] || presets[2];
       const { radiusExtra, randomness } = preset;
-      const radius = (targetDistanceMiles / loopPoints) * preset.radiusFactor * (1.3 + 0.1 * routeComplex);
+      const radius = (targetDistanceMiles / points) * preset.radiusFactor * (1.3 + 0.1 * routeComplex);
+
       const randomAngle = Math.random() * 2 * Math.PI;
       const waypoints = [];
 
