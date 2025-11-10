@@ -617,9 +617,17 @@
         .setLngLat([lonInput, latInput])
         .addTo(map);
 
-      const { routeGeoJSON, elevationGain } = await generateRouteToMatchDistance(
+      const result = await generateRouteToMatchDistance(
         latInput, lonInput, targetDistance, routeType, elevationProfile
       );
+
+      if (!result?.routeJSON) {
+        alert("Could not generate a route. Try a different location or distance.");
+        return;
+      }
+
+      const { routeJSON, elevationGain } = result;
+
       const coordData = routeGeoJSON.geometry.coordinates;
       const endCoords = coordData[coordData.length - 1];
       const routeLength = routeGeoJSON.properties.summary.distance / 1609.34;
