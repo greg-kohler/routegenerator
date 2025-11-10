@@ -365,6 +365,7 @@
           const actualRouteMiles = route.properties.summary.distance / 1609.34;
           const elevationGain = calculateElevation(coordData); // call once
           routeDifferenceMiles = Math.abs(actualRouteMiles - targetDistanceMiles);
+          console.log(`Attempt ${attemptCount + 1}: ${actualRouteMiles.toFixed(2)} mi (target ${targetDistanceMiles})`);
 
           // Check elevation preference
           let elevationOkay = true;
@@ -397,11 +398,8 @@
           }
         }
       }
-
       return { routeJSON, elevationGain: finalElevationGain };
     }
-
-
 
     // Add generated route to map
     function displayRouteOnMap(routeGeoJSON) {
