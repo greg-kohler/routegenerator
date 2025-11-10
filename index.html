@@ -290,8 +290,6 @@
     // Generate a loop of waypoints
     function generateLoopWaypointsNonOverlapping(startLat, startLon, distanceMiles, loopPoints) {
       const radius = Math.min(distanceMiles / loopPoints, 10); // no segment longer than ~10 miles
-
-
       const waypoints = [];
 
       // Random angle away from start in radians
@@ -299,7 +297,7 @@
 
       for (let i = 0; i < loopPoints; i++) {
         // Spread points around the circle but not symmetrically
-        const randomness = routeComplex > 5 ? 0.05 : 0.2;
+        const randomness = (loopPoints / 2) > 5 ? 0.05 : 0.2;
         const angle = randomAngle + (i * (Math.PI * 1.2 / loopPoints)) + (Math.random() * randomness);
         const latOffset = (radius / 69) * Math.cos(angle); // ~69 miles per degree latitude
         const lonOffset = (radius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle);
@@ -310,7 +308,7 @@
 
     // Main function to generate route to match target distance
     async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, routeComplex) {
-      const loopPoints = Math.min(routeComplex * 2, 12);
+      const loopPoints = (routeComplex * 2);
       let estimatedMiles = routeType === 'loop'
         ? targetDistanceMiles / (loopPoints * 2)
         : targetDistanceMiles;
