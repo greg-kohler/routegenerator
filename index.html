@@ -391,7 +391,7 @@
           }
           if (elevationPref === "2") {
             // Medium
-            if (elevationGain < (50 * targetDistanceMiles) || elevationGain > (150 * targetDistanceMiles)) {
+            if (elevationGain < (30 * targetDistanceMiles) || elevationGain > (170 * targetDistanceMiles)) {
               elevationOkay = false;
             }
           }
@@ -648,11 +648,6 @@
       const result = await generateRouteToMatchDistance(
         latInput, lonInput, targetDistance, routeType, elevationProfile
       );
-
-      if (!result?.routeGeoJSON) {
-        alert("Could not generate a route. Try a different location or distance.");
-        return;
-      }
 
       const { routeGeoJSON, elevationGain } = result;
 
