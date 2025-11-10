@@ -330,7 +330,7 @@
       let routeDifferenceMiles = Infinity;
       let attemptCount = 0;
       const maxAttempts = 10;
-      let routeJSON = null;
+      let routeGeoJSON = null;
       let finalElevationGain = 0;
 
       while (routeDifferenceMiles > (targetDistanceMiles * 0.08) && attemptCount < maxAttempts) {
@@ -379,7 +379,7 @@
 
           // Adjust estimatedMiles for next attempt
           estimatedMiles *= targetDistanceMiles / actualRouteMiles;
-          routeJSON = route;
+          routeGeoJSON = route;
           finalElevationGain = elevationGain;
           attemptCount++;
 
@@ -397,7 +397,7 @@
           }
         }
       }
-      return { routeJSON, elevationGain: finalElevationGain };
+      return { routeGeoJSON, elevationGain: finalElevationGain };
     }
 
     // Add generated route to map
