@@ -397,7 +397,7 @@
 
       let routeDifferenceMiles = Infinity;
       let attemptCount = 0;
-      const maxAttempts = Math.min(5 + routeComplex, 12);
+      const maxAttempts = 10;
       let routeJSON = null;
 
       while (routeDifferenceMiles > (targetDistanceMiles * 0.08) && attemptCount < maxAttempts) {
@@ -661,7 +661,6 @@
       const targetDistance = parseFloat(document.getElementById('distance').value);
       const routeType = document.querySelector('input[name="type"]:checked').value;
       const routeComplex = document.getElementById('complex').value;
-      console.log("Route Complex: " + routeComplex)
       const actualLengthElem = document.getElementById("actualLength");
       const elevChangeElem = document.getElementById("elevationChange");
       if (startMarker !== null) {
@@ -676,7 +675,7 @@
         .setLngLat([lonInput, latInput])
         .addTo(map);
 
-      const routeGeoJSON = await generateRouteToMatchDistance(latInput, lonInput, targetDistance, routeType, routeComplex);
+      const routeGeoJSON = await generateRouteToMatchDistance(latInput, lonInput, targetDistance, routeType);
       const coordData = routeGeoJSON.geometry.coordinates;
       const endCoords = coordData[coordData.length - 1];
       const elevationGain = calculateElevation(coordData);
