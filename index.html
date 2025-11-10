@@ -310,14 +310,13 @@
       const radius = (distanceMiles / loopPoints * 2);
       const waypoints = [];
       const randomAngle = Math.random() * 2 * Math.PI;
-      const shakeFactor = 0.002; // small wiggle for realism
 
       for (let i = 0; i < loopPoints; i++) {
         const angleNoise = (Math.random() - 0.5) * 0.2;
         const angle = randomAngle + (i * (Math.PI * 1.2 / loopPoints)) + angleNoise;
 
-        const latOffset = (radius / 69) * Math.cos(angle) + (Math.random() - 0.5) * shakeFactor;
-        const lonOffset = (radius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle) + (Math.random() - 0.5) * shakeFactor;
+        const latOffset = (radius / 69) * Math.cos(angle) + (Math.random() - 0.5);
+        const lonOffset = (radius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle) + (Math.random() - 0.5);
 
         waypoints.push([startLon + lonOffset, startLat + latOffset]);
       }
@@ -326,20 +325,19 @@
     }
 
     // Main function to generate route to match target distance
-    async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType) {
-      let estimatedMiles = routeType === 'loop'
-        ? targetDistanceMiles / 2
-        : targetDistanceMiles;
-
+    async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, elevationPref) {
+      let estimatedMiles = routeType === 'loop' ? targetDistanceMiles / 2 : targetDistanceMiles;
       let routeDifferenceMiles = Infinity;
       let attemptCount = 0;
       const maxAttempts = 10;
       let routeJSON = null;
+      let finalElevationGain = 0;
 
       while (routeDifferenceMiles > (targetDistanceMiles * 0.08) && attemptCount < maxAttempts) {
         let routeCoordinates;
+
         if (routeType === 'loop') {
-          const loopWaypoints = generateLoopWaypoints(startLat, startLon, targetDistanceMiles);
+          const loopWaypoints = generateLoopWaypointsNonOverlapping(startLat, startLon, targetDistanceMiles, 4);
           routeCoordinates = [
             [Number(startLon), Number(startLat)],
             ...loopWaypoints.map(p => p.map(Number)),
@@ -357,39 +355,52 @@
           const orsResponse = await callORS(routeCoordinates);
 
           if (!orsResponse?.features?.length) {
-            console.warn("No route returned. Trying again.");
+            console.warn("No route returned. Retrying...");
             attemptCount++;
             continue;
           }
 
           const route = orsResponse.features[0];
+          const coordData = route.geometry.coordinates;
           const actualRouteMiles = route.properties.summary.distance / 1609.34;
+          const elevationGain = calculateElevation(coordData); // call once
           routeDifferenceMiles = Math.abs(actualRouteMiles - targetDistanceMiles);
-          console.log(`Attempt ${attemptCount + 1}: ${actualRouteMiles.toFixed(2)} mi (target ${targetDistanceMiles})`);
 
+          // Check elevation preference
+          let elevationOkay = true;
+          if (elevationPref === 1 && elevationGain > 200) elevationOkay = false; // smooth
+          if (elevationPref === 3 && elevationGain < 500) elevationOkay = false; // hilly
+
+          if (!elevationOkay) {
+            console.log(`Elevation ${elevationGain} ft outside preference. Retrying...`);
+            attemptCount++;
+            continue;
+          }
+
+          // Adjust estimatedMiles for next attempt
           estimatedMiles *= targetDistanceMiles / actualRouteMiles;
           routeJSON = route;
+          finalElevationGain = elevationGain;
           attemptCount++;
 
-          // Small throttle to avoid rate limit
+          // Throttle to avoid rate limit
           await new Promise(r => setTimeout(r, 800));
 
         } catch (error) {
           if (error.type === "rateLimit") {
-            console.warn(`Rate limited. Waiting ${error.retryAfter}s before retry`);
+            console.warn(`Rate limited. Waiting ${error.retryAfter}s...`);
             await new Promise(r => setTimeout(r, error.retryAfter * 1000));
-            continue;
           } else {
             console.error("ORS request failed:", error);
             attemptCount++;
             await new Promise(r => setTimeout(r, 1000));
-            continue;
           }
         }
       }
 
-      return routeJSON;
+      return { routeJSON, elevationGain: finalElevationGain };
     }
+
 
 
     // Add generated route to map
@@ -534,8 +545,6 @@
       return totalGain.toFixed(0); // nearest whole foot
     }
 
-
-
     // Actual Running of Script
 
     // Add current location tool
@@ -611,10 +620,11 @@
         .setLngLat([lonInput, latInput])
         .addTo(map);
 
-      const routeGeoJSON = await generateRouteToMatchDistance(latInput, lonInput, targetDistance, routeType);
+      const { routeGeoJSON, elevationGain } = await generateRouteToMatchDistance(
+        latInput, lonInput, targetDistance, routeType, elevationProfile
+      );
       const coordData = routeGeoJSON.geometry.coordinates;
       const endCoords = coordData[coordData.length - 1];
-      const elevationGain = calculateElevation(coordData);
       const routeLength = routeGeoJSON.properties.summary.distance / 1609.34;
       displayRouteOnMap(routeGeoJSON);
       // Add end waypoint if needed
