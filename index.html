@@ -288,10 +288,10 @@
     }
 
     function generateLoopWaypointsEnhanced(startLat, startLon, targetDistanceMiles, routeComplex) {
-      // ensure numeric and clamped complexity
+      // Define complexity variable
       const complexity = Math.max(1, Math.min(5, Number(routeComplex) || 2));
 
-      // map complexity -> parameters
+      // Map Complexity Paramters
       const presets = {
         1: { points: 4, radiusExtra: 0.5, randomness: 0.05 },
         2: { points: 6, radiusExtra: 0.7, randomness: 0.08 },
@@ -303,28 +303,45 @@
       const preset = presets[complexity];
       const { points, radiusExtra, randomness } = preset;
 
-      // inflation factor to compensate for road network (tweakable)
+      // Inflation factor to compensate for road network
       const inflation = 1.1 + 0.1 * (complexity - 1);
 
-      // base radius in miles per point
+      // Base radius in miles per point
       const radius = (targetDistanceMiles / points) * radiusExtra * inflation;
 
       const randomAngle = Math.random() * 2 * Math.PI;
       const waypoints = [];
 
       for (let i = 0; i < points; i++) {
-        const angle = randomAngle + (i * (Math.PI * 1.6 / points)) + ((Math.random() - 0.5) * randomness);
+        // Irregular spacing based on complexity
+        const spacingNoise = 1 + (Math.random() - 0.5) * 0.25 * complexity;
+        const angle = randomAngle + i * (Math.PI * 1.6 / points) * spacingNoise + ((Math.random() - 0.5) * randomness);
+
         const localRadius = radius * (0.9 + Math.random() * 0.2);
         const latOffset = (localRadius / 69) * Math.cos(angle);
         const lonOffset = (localRadius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle);
-        const bias = 0.08 * complexity; // keep it reasonably local
-        const lon = startLon + lonOffset * (1 - bias);
-        const lat = startLat + latOffset * (1 - bias);
+
+        // Add small shake to move points off perfect circle
+        const shake = 0.002 * complexity; // about ~200m per level of complexity
+        const bias = 0.08 * complexity; // keep route roughly centered
+        const lon = startLon + lonOffset * (1 - bias) + (Math.random() - 0.5) * shake;
+        const lat = startLat + latOffset * (1 - bias) + (Math.random() - 0.5) * shake;
+
         waypoints.push([lon, lat]);
+
+        // occasional mini detour for higher complexities (adds spikes)
+        if (complexity >= 4 && i % 3 === 0) {
+          const detourAngle = angle + (Math.random() - 0.5);
+          const detourRadius = radius * (1 + Math.random() * 0.5);
+          const detourLon = startLon + (detourRadius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(detourAngle);
+          const detourLat = startLat + (detourRadius / 69) * Math.cos(detourAngle);
+          waypoints.push([detourLon, detourLat]);
+        }
       }
 
       return waypoints;
     }
+
 
 
     // Generate a loop of waypoints
@@ -355,7 +372,7 @@
 
       let routeDifferenceMiles = Infinity;
       let attemptCount = 0;
-      const maxAttempts = Math.min(5 + routeComplex, 8);
+      const maxAttempts = Math.min(5 + routeComplex, 12);
       let routeJSON = null;
 
       while (routeDifferenceMiles > (targetDistanceMiles * 0.08) && attemptCount < maxAttempts) {
