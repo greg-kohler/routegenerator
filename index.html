@@ -314,7 +314,7 @@
 
       for (let i = 0; i < points; i++) {
         // Irregular spacing based on complexity
-        const spacingNoise = 1 + (Math.random() - 0.5) * 0.25 * complexity;
+        const spacingNoise = 1 + (Math.random() - 0.5) * 0.1 * complexity;
         const angle = randomAngle + i * (Math.PI * 1.6 / points) * spacingNoise + ((Math.random() - 0.5) * randomness);
 
         const localRadius = radius * (0.9 + Math.random() * 0.2);
@@ -332,7 +332,7 @@
         // occasional mini detour for higher complexities (adds spikes)
         if (complexity >= 4 && i % 3 === 0) {
           const detourAngle = angle + (Math.random() - 0.5);
-          const detourRadius = radius * (1 + Math.random() * 0.5);
+          const detourRadius = radius * (0.5 + Math.random() * 0.5); // never more than radius
           const detourLon = startLon + (detourRadius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(detourAngle);
           const detourLat = startLat + (detourRadius / 69) * Math.cos(detourAngle);
           waypoints.push([detourLon, detourLat]);
