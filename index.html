@@ -238,8 +238,8 @@
     // Updated callORS to use subset
     async function callORS(coordinates) {
       const requestBody = {
-        coordinates: coordinates,
-        elevation: true,
+        coordinates,
+        elevation: coordinates.length < 10,
         format: 'geojson',
         options: {}
       };
@@ -253,9 +253,21 @@
         body: JSON.stringify(requestBody)
       });
 
+      // Handle specific ORS errors
+      if (response.status === 429) {
+        const retryAfter = response.headers.get("Retry-After") || 3;
+        throw { type: "rateLimit", retryAfter: Number(retryAfter) };
+      }
+
+      if (!response.ok) {
+        console.error(`ORS error: ${response.status} ${response.statusText}`);
+        throw new Error(`ORS failed: ${response.status}`);
+      }
+
       const data = await response.json();
       return data;
     }
+
 
     // Generate random destination point
     function randomDestination(startLat, startLon, distanceMiles) {
@@ -298,23 +310,18 @@
 
     // Main function to generate route to match target distance
     async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, routeComplex) {
-      const loopPoints = routeComplex * 2;
+      const loopPoints = Math.min(routeComplex * 2, 12);
       let estimatedMiles = routeType === 'loop'
-        // Loop distance
         ? targetDistanceMiles / (loopPoints * 2)
-        // Oneway distance
         : targetDistanceMiles;
 
-      // Establish variables
       let routeDifferenceMiles = Infinity;
       let attemptCount = 0;
-      const maxAttempts = (10 + routeComplex); // Max route generations
+      const maxAttempts = Math.min(5 + routeComplex, 8);
       let routeJSON = null;
 
-      // Generate route until one is within 10% of the goal
       while (routeDifferenceMiles > (targetDistanceMiles * 0.1) && attemptCount < maxAttempts) {
         let routeCoordinates;
-        // If loop selected, generate the waypoints
         if (routeType === 'loop') {
           const loopWaypoints = generateLoopWaypointsNonOverlapping(startLat, startLon, targetDistanceMiles, loopPoints);
           routeCoordinates = [
@@ -322,7 +329,6 @@
             ...loopWaypoints.map(p => p.map(Number)),
             [Number(startLon), Number(startLat)]
           ];
-          // Otherwise make one-way
         } else {
           const randomPoint = randomDestination(startLat, startLon, estimatedMiles);
           routeCoordinates = [
@@ -331,29 +337,44 @@
           ];
         }
 
-        // Generate route using ORS API with waypoints
-        const orsResponse = await callORS(routeCoordinates);
-        // Catch if no route can be made
-        if (!orsResponse.features || orsResponse.features.length === 0) {
-          console.warn("No route returned. Trying again.");
+        try {
+          const orsResponse = await callORS(routeCoordinates);
+
+          if (!orsResponse?.features?.length) {
+            console.warn("No route returned. Trying again.");
+            attemptCount++;
+            continue;
+          }
+
+          const route = orsResponse.features[0];
+          const actualRouteMiles = route.properties.summary.distance / 1609.34;
+          routeDifferenceMiles = Math.abs(actualRouteMiles - targetDistanceMiles);
+          console.log(`Attempt ${attemptCount + 1}: ${actualRouteMiles.toFixed(2)} mi (target ${targetDistanceMiles})`);
+
+          estimatedMiles *= targetDistanceMiles / actualRouteMiles;
+          routeJSON = route;
           attemptCount++;
-          continue;
+
+          // Small throttle to avoid rate limit
+          await new Promise(r => setTimeout(r, 800));
+
+        } catch (error) {
+          if (error.type === "rateLimit") {
+            console.warn(`Rate limited. Waiting ${error.retryAfter}s before retry`);
+            await new Promise(r => setTimeout(r, error.retryAfter * 1000));
+            continue;
+          } else {
+            console.erroror("ORS request failed:", error);
+            attemptCount++;
+            await new Promise(r => setTimeout(r, 1000));
+            continue;
+          }
         }
-
-        // Get route length as variable (in miles)
-        const route = orsResponse.features[0];
-        const actualRouteMiles = route.properties.summary.distance / 1609.34;
-
-        // Calculate delta
-        routeDifferenceMiles = Math.abs(actualRouteMiles - targetDistanceMiles);
-        console.log(`Attempt ${attemptCount + 1}: ${actualRouteMiles.toFixed(2)} mi (target ${targetDistanceMiles})`);
-        estimatedMiles *= targetDistanceMiles / actualRouteMiles;
-        attemptCount++;
-        routeJSON = route;
       }
 
       return routeJSON;
     }
+
 
     // Add generated route to map
     function displayRouteOnMap(routeGeoJSON) {
