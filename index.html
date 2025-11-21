@@ -241,7 +241,7 @@
     });
 
     // Load arrow image
-    map.loadImage('https://github.com/greg-kohler/routegenerator/blob/main/blue-chevron.png?raw=true', (error, image) => {
+    map.loadImage('https://raw.githubusercontent.com/greg-kohler/routegenerator/refs/heads/main/blue-chevron.png', (error, image) => {
       if (error) throw error;
       if (!map.hasImage('arrow-icon')) {
         map.addImage('arrow-icon', image);
@@ -464,7 +464,7 @@
           'symbol-placement': 'line',
           'symbol-spacing': 22,
           'icon-image': 'arrow-icon',
-          'icon-size': 0.15,
+          'icon-size': 0.1,
           'icon-rotate': 180
         }
       });
