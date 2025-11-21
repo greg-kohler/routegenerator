@@ -241,7 +241,7 @@
     });
 
     // Load arrow image
-    map.loadImage('https://cdn-icons-png.flaticon.com/256/3916/3916837.png', (error, image) => {
+    map.loadImage('blue-chevron.png', (error, image) => {
       if (error) throw error;
       if (!map.hasImage('arrow-icon')) {
         map.addImage('arrow-icon', image);
@@ -464,7 +464,7 @@
           'symbol-placement': 'line',
           'symbol-spacing': 22,
           'icon-image': 'arrow-icon',
-          'icon-size': 0.2,
+          'icon-size': 0.15,
           'icon-rotate': 180
         }
       });
