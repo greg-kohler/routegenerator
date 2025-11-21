@@ -324,7 +324,7 @@
 
     function generateLoopWaypoints(startLat, startLon, distanceMiles) {
       const loopPoints = 3;
-      const radius = distanceMiles / (loopPoints * 2); // remove the *2
+      const radius = distanceMiles / (loopPoints * 2);
       const waypoints = [];
       const randomAngle = Math.random() * 2 * Math.PI;
 
@@ -464,7 +464,7 @@
           'symbol-placement': 'line',
           'symbol-spacing': 22,
           'icon-image': 'arrow-icon',
-          'icon-size': 0.1,
+          'icon-size': 0.05,
           'icon-rotate': 180
         }
       });
