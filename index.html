@@ -624,7 +624,7 @@
         endMarker.remove();
       }
       console.log(`Coordinates Submitted: ${latInput} & ${lonInput}`)
-      startMarker = new mapboxgl.Marker()
+      startMarker = new mapboxgl.Marker({ color: '#739E82'})
         .setLngLat([lonInput, latInput])
         .addTo(map);
 
@@ -640,7 +640,7 @@
       displayRouteOnMap(routeGeoJSON);
       // Add end waypoint if needed
       if (routeType != 'loop') {
-        endMarker = new mapboxgl.Marker({ color: 'orange' })
+        endMarker = new mapboxgl.Marker({ color: '#D38B5D' })
           .setLngLat([endCoords[0], endCoords[1]])
           .addTo(map);
       }
