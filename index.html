@@ -577,7 +577,7 @@
         startMarker.remove();
       }
 
-      startMarker = new mapboxgl.Marker({ color: '#739E82'})
+      startMarker = new mapboxgl.Marker({ color: '#739E82' })
         .setLngLat([currentLon, currentLat])
         .addTo(map);
     });
@@ -593,7 +593,7 @@
       if (startMarker !== null) {
         startMarker.remove();
       }
-      startMarker = new mapboxgl.Marker({ color: '#739E82'})
+      startMarker = new mapboxgl.Marker({ color: '#739E82' })
         .setLngLat([currentLon, currentLat])
         .addTo(map);
       map.flyTo({
@@ -624,7 +624,7 @@
         endMarker.remove();
       }
       console.log(`Coordinates Submitted: ${latInput} & ${lonInput}`)
-      startMarker = new mapboxgl.Marker({ color: '#739E82'})
+      startMarker = new mapboxgl.Marker({ color: '#739E82' })
         .setLngLat([lonInput, latInput])
         .addTo(map);
 
@@ -634,17 +634,14 @@
         lonInput < -180 || lonInput > 180 || !latInput || !lonInput) {
         alert("Please enter valid latitude and longitude values.");
         return;
-      }
-      
-      if (isNaN(targetDistance) || targetDistance <= 0) {
+      } else if (isNaN(targetDistance) || targetDistance <= 0) {
         alert("Please enter a valid positive number for distance.");
         return;
-      }
-
-      if (!routeType || isNaN(routeType)) {
+      } else if (!routeType || isNaN(routeType)) {
         alert("Please select a route type.");
         return;
       }
+
       actualLengthElem.textContent = "Loading...";
       const result = await generateRouteToMatchDistance(
         latInput, lonInput, targetDistance, routeType, elevationProfile
