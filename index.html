@@ -304,23 +304,54 @@
     }
 
     function generateLoopWaypoints(startLat, startLon, distanceMiles) {
-      const loopPoints = 10;
-      const radius = distanceMiles / (loopPoints * 1.5);
+      const loopPoints = 4;              // 4 works best
+      const radius = distanceMiles / 6;  // keeps loop size correct
+      const MIN_SPACING_MILES = 0.15;    // no two waypoints too close
       const waypoints = [];
-      const randomAngle = Math.random() * 2 * Math.PI;
+
+      const startAngle = Math.random() * 2 * Math.PI;
+
+      function distMiles(lat1, lon1, lat2, lon2) {
+        const R = 3958.8;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) ** 2 +
+          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+          Math.sin(dLon / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      }
 
       for (let i = 0; i < loopPoints; i++) {
-        const angleNoise = (Math.random() - 0.5) * 0.2;
-        const angle = randomAngle + (i * (Math.PI * 1.2 / loopPoints)) + angleNoise;
+        let wpLat, wpLon;
+        let attempts = 0;
 
-        const latOffset = (radius / 69) * Math.cos(angle) + (Math.random() - 0.5) * 0.002; // ~200m shake
-        const lonOffset = (radius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle) + (Math.random() - 0.5) * 0.002;
+        while (attempts < 15) {
+          attempts++;
 
-        waypoints.push([startLon + lonOffset, startLat + latOffset]);
+          // ensure points wrap smoothly around the loop
+          const baseAngle = startAngle + (i * 2 * Math.PI / loopPoints);
+
+          // small random jitter but never backwards-facing
+          const angle = baseAngle + (Math.random() - 0.5) * 0.25;
+
+          wpLat = startLat + (radius / 69) * Math.cos(angle);
+          wpLon = startLon + (radius / (69 * Math.cos(startLat * Math.PI / 180))) *
+            Math.sin(angle);
+
+          // keep spacing so ORS doesn't shortcut
+          const tooClose = waypoints.some(([lon, lat]) =>
+            distMiles(lat, lon, wpLat, wpLon) < MIN_SPACING_MILES
+          );
+
+          if (!tooClose) break;
+        }
+
+        waypoints.push([wpLon, wpLat]);
       }
 
       return waypoints;
     }
+
 
     // Main function to generate route to match target distance
     async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, elevationPref) {
