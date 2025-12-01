@@ -253,15 +253,10 @@
 
     // Function to call OpenRouteService API
     // Updated callORS to use subset
-    async function callORS(coordinates) {
-      const requestBody = {
-        coordinates,
-        elevation: true,
-        format: 'geojson',
-        options: {}
-      };
+    async function callORS(requestBody) {
+      const url = 'https://api.openrouteservice.org/v2/directions/foot-walking/geojson';
 
-      const response = await fetch('https://api.openrouteservice.org/v2/directions/foot-walking/geojson', {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Authorization': ORS_KEY,
@@ -270,20 +265,21 @@
         body: JSON.stringify(requestBody)
       });
 
-      // Handle specific ORS errors
+      // Rate limit handling
       if (response.status === 429) {
         const retryAfter = response.headers.get("Retry-After") || 3;
         throw { type: "rateLimit", retryAfter: Number(retryAfter) };
       }
 
       if (!response.ok) {
-        console.error(`ORS error: ${response.status} ${response.statusText}`);
+        const text = await response.text();
+        console.error("ORS error:", text);
         throw new Error(`ORS failed: ${response.status}`);
       }
 
-      const data = await response.json();
-      return data;
+      return response.json();
     }
+
 
     // Generate random destination point
     function randomDestination(startLat, startLon, distanceMiles) {
@@ -304,84 +300,68 @@
     }
 
     function generateLoopWaypoints(startLat, startLon, distanceMiles) {
-      const loopPoints = 4;              // 4 works best
-      const radius = distanceMiles / 6;  // keeps loop size correct
-      const MIN_SPACING_MILES = 0.15;    // no two waypoints too close
+      const loopPoints = 4;
+      const radius = distanceMiles / (loopPoints * 1.5);
       const waypoints = [];
-
-      const startAngle = Math.random() * 2 * Math.PI;
-
-      function distMiles(lat1, lon1, lat2, lon2) {
-        const R = 3958.8;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat / 2) ** 2 +
-          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-          Math.sin(dLon / 2) ** 2;
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      }
+      const randomAngle = Math.random() * 2 * Math.PI;
 
       for (let i = 0; i < loopPoints; i++) {
-        let wpLat, wpLon;
-        let attempts = 0;
+        const angleNoise = (Math.random() - 0.5) * 0.2;
+        const angle = randomAngle + (i * (Math.PI * 1.2 / loopPoints)) + angleNoise;
 
-        while (attempts < 15) {
-          attempts++;
+        const latOffset = (radius / 69) * Math.cos(angle) + (Math.random() - 0.5) * 0.002; // ~200m shake
+        const lonOffset = (radius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle) + (Math.random() - 0.5) * 0.002;
 
-          // ensure points wrap smoothly around the loop
-          const baseAngle = startAngle + (i * 2 * Math.PI / loopPoints);
-
-          // small random jitter but never backwards-facing
-          const angle = baseAngle + (Math.random() - 0.5) * 0.25;
-
-          wpLat = startLat + (radius / 69) * Math.cos(angle);
-          wpLon = startLon + (radius / (69 * Math.cos(startLat * Math.PI / 180))) *
-            Math.sin(angle);
-
-          // keep spacing so ORS doesn't shortcut
-          const tooClose = waypoints.some(([lon, lat]) =>
-            distMiles(lat, lon, wpLat, wpLon) < MIN_SPACING_MILES
-          );
-
-          if (!tooClose) break;
-        }
-
-        waypoints.push([wpLon, wpLat]);
+        waypoints.push([startLon + lonOffset, startLat + latOffset]);
       }
 
       return waypoints;
     }
 
-
     // Main function to generate route to match target distance
     async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, elevationPref) {
-      let estimatedMiles = routeType === 'loop' ? targetDistanceMiles / 2 : targetDistanceMiles;
+      let estimatedMiles = routeType === 'loop' ? targetDistanceMiles : targetDistanceMiles;
       let routeDifferenceMiles = Infinity;
       let attemptCount = 0;
-      const maxAttempts = 10;
+      const maxAttempts = 8;
       let routeGeoJSON = null;
       let finalElevationGain = 0;
 
       while (routeDifferenceMiles > (targetDistanceMiles * 0.08) && attemptCount < maxAttempts) {
-        let routeCoordinates;
-
-        if (routeType === 'loop') {
-          const loopWaypoints = generateLoopWaypoints(startLat, startLon, targetDistanceMiles, 4);
-          routeCoordinates = [
-            [Number(startLon), Number(startLat)],
-            ...loopWaypoints.map(p => p.map(Number)),
-            [Number(startLon), Number(startLat)]
-          ];
-        } else {
-          const randomPoint = randomDestination(startLat, startLon, estimatedMiles);
-          routeCoordinates = [
-            [Number(startLon), Number(startLat)],
-            randomPoint.map(Number)
-          ];
-        }
+        let orsResponse;
 
         try {
-          const orsResponse = await callORS(routeCoordinates);
+          if (routeType === 'loop') {
+            // Pedestrian round-trip loop
+            const requestBody = {
+              coordinates: [[startLon, startLat]],
+              elevation: true,
+              format: 'geojson',
+              round_trip: {
+                length: estimatedMiles * 1609.34, // meters
+                points: 3,                        // ORS selects smooth loop points
+                seed: Math.floor(Math.random() * 10000)
+              }
+            };
+
+            orsResponse = await callORS(requestBody);
+
+          } else {
+            // Out-and-back / point-to-point
+            const randomPoint = randomDestination(startLat, startLon, estimatedMiles);
+
+            const requestBody = {
+              coordinates: [
+                [startLon, startLat],
+                randomPoint.map(Number)
+              ],
+              elevation: true,
+              format: 'geojson'
+            };
+
+            orsResponse = await callORS(requestBody);
+          }
+
           if (!orsResponse?.features?.length) {
             console.warn("No route returned. Retrying...");
             attemptCount++;
@@ -392,41 +372,31 @@
           const coordData = route.geometry.coordinates;
           const actualRouteMiles = route.properties.summary.distance / 1609.34;
           const elevationGain = calculateElevation(coordData);
-          // Store route before checking elevation
+
           routeGeoJSON = route;
           finalElevationGain = elevationGain;
 
           routeDifferenceMiles = Math.abs(actualRouteMiles - targetDistanceMiles);
           console.log(`Attempt ${attemptCount + 1}: ${actualRouteMiles.toFixed(2)} mi (target ${targetDistanceMiles})`);
 
-          // Check elevation preference
+          // Elevation preference checks
           let elevationOkay = true;
-          if (elevationPref === "1" && elevationGain > (50 * targetDistanceMiles)) {
-            // Smooth
-            elevationOkay = false;
-          }
-          if (elevationPref === "2") {
-            // Medium
-            if (elevationGain < (30 * targetDistanceMiles) || elevationGain > (170 * targetDistanceMiles)) {
-              elevationOkay = false;
-            }
-          }
-          if (elevationPref === "3" && elevationGain < (150 * targetDistanceMiles)) {
-            // Hilly
-            elevationOkay = false;
-          }
+          if (elevationPref === "1" && elevationGain > (50 * targetDistanceMiles)) elevationOkay = false;
+          if (elevationPref === "2" && (elevationGain < (30 * targetDistanceMiles) || elevationGain > (170 * targetDistanceMiles))) elevationOkay = false;
+          if (elevationPref === "3" && elevationGain < (150 * targetDistanceMiles)) elevationOkay = false;
+
           if (!elevationOkay) {
             console.log(`Elevation ${elevationGain} ft outside preference. Retrying...`);
             attemptCount++;
             continue;
           }
 
-          // Adjust estimatedMiles for next attempt
+          // Adjust estimated miles for next attempt
           estimatedMiles *= targetDistanceMiles / actualRouteMiles;
           attemptCount++;
 
-          // Throttle to avoid rate limit
-          await new Promise(r => setTimeout(r, 800));
+          // Throttle to avoid rate limits
+          await new Promise(r => setTimeout(r, 700));
 
         } catch (error) {
           if (error.type === "rateLimit") {
@@ -439,8 +409,11 @@
           }
         }
       }
+
       return { routeGeoJSON, elevationGain: finalElevationGain };
     }
+
+
 
     // Add generated route to map
     function displayRouteOnMap(routeGeoJSON) {
