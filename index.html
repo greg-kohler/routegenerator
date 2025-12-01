@@ -620,6 +620,7 @@
         alert("Please select a route type.");
         return;
       }
+      
       const latInput = Number(document.getElementById('startlat').value);
       const lonInput = Number(document.getElementById('startlon').value);
       const targetDistance = parseFloat(document.getElementById('distance').value);
@@ -638,20 +639,6 @@
       startMarker = new mapboxgl.Marker({ color: '#739E82' })
         .setLngLat([lonInput, latInput])
         .addTo(map);
-
-
-      if (isNaN(latInput) || isNaN(lonInput) ||
-        latInput < -90 || latInput > 90 ||
-        lonInput < -180 || lonInput > 180 || !latInput || !lonInput) {
-        alert("Please enter valid latitude and longitude values.");
-        return;
-      } else if (isNaN(targetDistance) || targetDistance <= 0) {
-        alert("Please enter a valid positive number for distance.");
-        return;
-      } else if (!routeType || isNaN(routeType)) {
-        alert("Please select a route type.");
-        return;
-      }
 
       actualLengthElem.textContent = "Loading...";
       const result = await generateRouteToMatchDistance(
