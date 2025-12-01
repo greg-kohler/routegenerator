@@ -628,6 +628,23 @@
         .setLngLat([lonInput, latInput])
         .addTo(map);
 
+      if (isNaN(latInput) || isNaN(lonInput) ||
+        latInput < -90 || latInput > 90 ||
+        lonInput < -180 || lonInput > 180) {
+        alert("Please enter valid latitude and longitude values.");
+        return;
+      }
+      
+      if (isNaN(targetDistance) || targetDistance <= 0) {
+        alert("Please enter a valid positive number for distance.");
+        return;
+      }
+
+      if (!routeType) {
+        alert("Please select a route type.");
+        return;
+      }
+      actualLengthElem.textContent = "Loading...";
       const result = await generateRouteToMatchDistance(
         latInput, lonInput, targetDistance, routeType, elevationProfile
       );
