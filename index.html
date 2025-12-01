@@ -610,10 +610,10 @@
     submitButton.addEventListener('click', async () => {
       console.log("Submit Button Clicked")
 
-      if !document.getElementById('startlat').value || !document.getElementById('startlon').value {
+      if (!document.getElementById('startlat').value || !document.getElementById('startlon').value) {
         alert("Please enter valid latitude and longitude values.");
         return;
-      } else if !document.getElementById('distance').value {
+      } else if (!document.getElementById('distance').value) {
         alert("Please enter a valid positive number for distance.");
         return;
       } else if (!document.querySelector('input[name="type"]:checked')) {
