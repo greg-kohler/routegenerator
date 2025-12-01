@@ -304,7 +304,7 @@
     }
 
     function generateLoopWaypoints(startLat, startLon, distanceMiles) {
-      const loopPoints = 2;
+      const loopPoints = 3;
       const radius = distanceMiles / (loopPoints * 2);
       const waypoints = [];
       const randomAngle = Math.random() * 2 * Math.PI;
@@ -641,6 +641,7 @@
         .addTo(map);
 
       actualLengthElem.textContent = "Loading...";
+      elevChangeElem.textContent = "";
       const result = await generateRouteToMatchDistance(
         latInput, lonInput, targetDistance, routeType, elevationProfile
       );
