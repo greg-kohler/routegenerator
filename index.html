@@ -258,9 +258,7 @@
         coordinates,
         elevation: true,
         format: 'geojson',
-        options: {
-          continue_straight: true
-        }
+        options: {}
       };
 
       const response = await fetch('https://api.openrouteservice.org/v2/directions/foot-walking/geojson', {
@@ -306,7 +304,7 @@
     }
 
     function generateLoopWaypoints(startLat, startLon, distanceMiles) {
-      const loopPoints = 3;
+      const loopPoints = 5;
       const radius = distanceMiles / (loopPoints * 2);
       const waypoints = [];
       const randomAngle = Math.random() * 2 * Math.PI;
