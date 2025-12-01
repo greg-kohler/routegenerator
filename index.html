@@ -609,6 +609,17 @@
     // Action after submit button
     submitButton.addEventListener('click', async () => {
       console.log("Submit Button Clicked")
+
+      if !document.getElementById('startlat').value || !document.getElementById('startlon').value {
+        alert("Please enter valid latitude and longitude values.");
+        return;
+      } else if !document.getElementById('distance').value {
+        alert("Please enter a valid positive number for distance.");
+        return;
+      } else if (!document.querySelector('input[name="type"]:checked')) {
+        alert("Please select a route type.");
+        return;
+      }
       const latInput = Number(document.getElementById('startlat').value);
       const lonInput = Number(document.getElementById('startlon').value);
       const targetDistance = parseFloat(document.getElementById('distance').value);
