@@ -593,7 +593,7 @@
       if (startMarker !== null) {
         startMarker.remove();
       }
-      startMarker = new mapboxgl.Marker()
+      startMarker = new mapboxgl.Marker({ color: '#739E82'})
         .setLngLat([currentLon, currentLat])
         .addTo(map);
       map.flyTo({
