@@ -628,9 +628,10 @@
         .setLngLat([lonInput, latInput])
         .addTo(map);
 
+
       if (isNaN(latInput) || isNaN(lonInput) ||
         latInput < -90 || latInput > 90 ||
-        lonInput < -180 || lonInput > 180) {
+        lonInput < -180 || lonInput > 180 || !latInput || !lonInput) {
         alert("Please enter valid latitude and longitude values.");
         return;
       }
@@ -640,7 +641,7 @@
         return;
       }
 
-      if (!routeType) {
+      if (!routeType || isNaN(routeType)) {
         alert("Please select a route type.");
         return;
       }
