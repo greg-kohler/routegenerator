@@ -303,25 +303,6 @@
       return [startLon + deltaLon, startLat + deltaLat];
     }
 
-    // Generate a loop of waypoints
-    function generateLoopWaypointsNonOverlapping(startLat, startLon, distanceMiles, loopPoints) {
-      const radius = Math.min(distanceMiles / loopPoints, 10); // no segment longer than ~10 miles
-      const waypoints = [];
-
-      // Random angle away from start in radians
-      const randomAngle = Math.random() * 2 * Math.PI;
-
-      for (let i = 0; i < loopPoints; i++) {
-        // Spread points around the circle but not symmetrically
-        const randomness = (loopPoints / 2) > 5 ? 0.05 : 0.2;
-        const angle = randomAngle + (i * (Math.PI * 1.2 / loopPoints)) + (Math.random() * randomness);
-        const latOffset = (radius / 69) * Math.cos(angle); // ~69 miles per degree latitude
-        const lonOffset = (radius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle);
-        waypoints.push([startLon + lonOffset, startLat + latOffset]);
-      }
-      return waypoints;
-    }
-
     function generateLoopWaypoints(startLat, startLon, distanceMiles) {
       const loopPoints = 3;
       const radius = distanceMiles / (loopPoints * 2);
@@ -465,7 +446,7 @@
           'symbol-spacing': 25,
           'icon-image': 'arrow-icon',
           'icon-size': 0.1,
-          'icon-rotate': 180
+          'icon-rotate': 0
         }
       });
 
