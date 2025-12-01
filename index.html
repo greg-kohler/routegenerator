@@ -305,7 +305,8 @@
 
     function generateLoopWaypoints(startLat, startLon, distanceMiles) {
       const loopPoints = 5;
-      const radius = distanceMiles / (loopPoints * 2);
+      const radius = distanceMiles / 3;
+      // const radius = distanceMiles / (loopPoints * 2);
       const waypoints = [];
       const randomAngle = Math.random() * 2 * Math.PI;
 
