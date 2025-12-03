@@ -305,33 +305,24 @@
     }
 
     function generateLoopWaypoints(startLat, startLon, distanceMiles) {
-      const loopPoints = 5;
-      // Road network inflation compensation
-      const inflationFactor = 1.6;
-
-      // Get radius
-      const radius = (distanceMiles / (2 * Math.PI)) / inflationFactor * 0.95;
-
+      const loopPoints = 3;
+      const radius = distanceMiles / (Math.PI * 2);
       const waypoints = [];
-      const baseAngle = Math.random() * 2 * Math.PI;
+      const randomAngle = Math.random() * 2 * Math.PI;
 
       for (let i = 0; i < loopPoints; i++) {
-        let angle = baseAngle + (i * (2 * Math.PI / loopPoints));
+        const angleNoise = (Math.random() - 0.5) * 0.2;
+        const angle = randomAngle + (i * (Math.PI * 1.2 / loopPoints)) + angleNoise;
 
-        // Add noise to distort loop
-        angle += (Math.random() - 0.5) * (Math.PI / 9);
-
-        // Add shake
-        const shake = (Math.random() - 0.5) * 0.0002; // ~50m shake
-
-        const latOffset = (radius / 69) * Math.cos(angle) + shake;
-        const lonOffset = (radius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle) + shake;
+        const latOffset = (radius / 69) * Math.cos(angle) + (Math.random() - 0.5) * 0.002; // ~200m shake
+        const lonOffset = (radius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle) + (Math.random() - 0.5) * 0.002;
 
         waypoints.push([startLon + lonOffset, startLat + latOffset]);
       }
 
       return waypoints;
     }
+
 
 
     // Main function to generate route to match target distance
