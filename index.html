@@ -200,7 +200,7 @@
         <div class="input-box">
           <label for="distance">Distance Goal (miles):</label>
           <div>
-            <input type="number" id="distance" name="distance">
+            <input type="number" id="distance" name="distance" step="0.01" min="0" inputmode="decimal">
           </div>
         </div>
         <div class="radio-box">
@@ -304,13 +304,13 @@
     }
 
     function generateLoopWaypoints(startLat, startLon, distanceMiles) {
-      const loopPoints = 3;
+      const loopPoints = 10;
       const radius = distanceMiles / (loopPoints * 2);
       const waypoints = [];
       const randomAngle = Math.random() * 2 * Math.PI;
 
       for (let i = 0; i < loopPoints; i++) {
-        const angleNoise = (Math.random() - 0.5) * 0.2;
+        const angleNoise = (Math.random() - 0.5) * 0.002;
         const angle = randomAngle + (i * (Math.PI * 1.2 / loopPoints)) + angleNoise;
 
         const latOffset = (radius / 69) * Math.cos(angle) + (Math.random() - 0.5) * 0.0072; // ~200m shake
