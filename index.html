@@ -305,7 +305,7 @@
     }
 
     function generateLoopWaypoints(startLat, startLon, distanceMiles) {
-      const loopPoints = 4;
+      const loopPoints = 5;
       // Road network inflation compensation
       const inflationFactor = 1.6;
 
@@ -322,7 +322,7 @@
         angle += (Math.random() - 0.5) * (Math.PI / 9);
 
         // Add shake
-        const shake = (Math.random() - 0.5) * 0.0005; // ~50m shake
+        const shake = (Math.random() - 0.5) * 0.0002; // ~50m shake
 
         const latOffset = (radius / 69) * Math.cos(angle) + shake;
         const lonOffset = (radius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle) + shake;
