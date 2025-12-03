@@ -311,9 +311,9 @@
 
       for (let i = 0; i < loopPoints; i++) {
         const angleNoise = (Math.random() - 0.5) * 0.2;
-        const angle = randomAngle + (i * (Math.PI * 1.2 / loopPoints)) + angleNoise;
+        const angle = randomAngle + (i * (2 * Math.PI / loopPoints)) + angleNoise;
 
-        const latOffset = (radius / 69) * Math.cos(angle) + (Math.random() - 0.5) * 0.002; // ~200m shake
+        const latOffset = (radius / 69) * Math.cos(angle) + (Math.random() - 0.5) * 0.0092; // ~200m shake
         const lonOffset = (radius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle) + (Math.random() - 0.5) * 0.002;
 
         waypoints.push([startLon + lonOffset, startLat + latOffset]);
@@ -335,7 +335,7 @@
         let routeCoordinates;
 
         if (routeType === 'loop') {
-          const loopWaypoints = generateLoopWaypoints(startLat, startLon, targetDistanceMiles, 4);
+          const loopWaypoints = generateLoopWaypoints(startLat, startLon, targetDistanceMiles);
           routeCoordinates = [
             [Number(startLon), Number(startLat)],
             ...loopWaypoints.map(p => p.map(Number)),
@@ -443,7 +443,7 @@
         source: 'route',
         layout: {
           'symbol-placement': 'line',
-          'symbol-spacing': 25,
+          'symbol-spacing': 40,
           'icon-image': 'arrow-icon',
           'icon-size': 0.1,
           'icon-rotate': 0
