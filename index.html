@@ -601,7 +601,7 @@
         .addTo(map);
       map.flyTo({
         center: [currentLon, currentLat],
-        zoom: 11,
+        zoom: 14,
         essential: true
       })
     });
@@ -663,8 +663,9 @@
       }
       console.log(routeLength);
       console.log(elevationGain);
+      routeSimple = routeLength.toFixed(2);
       // Change actual route length value
-      actualLengthElem.textContent = "Route Length: " + routeLength;
+      actualLengthElem.textContent = "Route Length: " + routeSimple + " miles";
       elevChangeElem.textContent = "Elevation Gain: " + elevationGain + " feet";
     });
     const elevInput = document.getElementById('elevProf');
