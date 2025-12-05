@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>Route Generator</title>
+  <title>Pedestrian Route Generator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
@@ -13,6 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?			family=TikTok+Sans:opsz,wght@12..36,300..900&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
   <style>
     body {
       margin: 0;
@@ -42,6 +43,7 @@
 
     .header-bar {
       height: 7vh;
+      min-height: 20px;
       overflow: auto;
       background-color: #2C5530;
       color: white;
@@ -212,7 +214,7 @@
               <label for="type">One Way</label>
             </div>
             <div class="radio-label">
-              <input type="radio" id="type-loop" name="type" value="loop">
+              <input type="radio" id="type-loop" name="type" value="loop" checked="checked">
               <label for="type">Loop</label>
             </div>
           </div>
@@ -232,7 +234,7 @@
   </div>
   <script>
 
-    // MapBox Tile Setup
+    // Access mapbox tile / map service
     mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZ2Frb2hsZXIiLCJhIjoiY21oNmNteHM3MGlueDJrcTJnYnhrNG1hdSJ9.Jms57i-_QvRWoquaAuy-1A';
     const map = new mapboxgl.Map({
       container: 'map',
@@ -253,7 +255,6 @@
     const ORS_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImEyNjk3YjQ5M2QwNTRjZTNiZTZiNzJkZDY5NmM4Y2E0IiwiaCI6Im11cm11cjY0In0=';
 
     // Function to call OpenRouteService API
-    // Updated callORS to use subset
     async function callORS(coordinates) {
       const requestBody = {
         coordinates,
@@ -271,7 +272,7 @@
         body: JSON.stringify(requestBody)
       });
 
-      // Handle specific ORS errors
+      // Handle ORS errors
       if (response.status === 429) {
         const retryAfter = response.headers.get("Retry-After") || 3;
         throw { type: "rateLimit", retryAfter: Number(retryAfter) };
@@ -295,7 +296,7 @@
       // Random angle away from start in radians
       const randomAngle = Math.random() * 2 * Math.PI;
 
-      // Offsets in miles
+      // Offsets coordinates
       const deltaLat = (Math.sin(randomAngle) * distanceMiles) / milesPerDegreeLat;
       const deltaLon = (Math.cos(randomAngle) * distanceMiles) / milesPerDegreeLon;
       console.log("Random Point:", [startLon + deltaLon, startLat + deltaLat])
@@ -304,9 +305,10 @@
       return [startLon + deltaLon, startLat + deltaLat];
     }
 
+    // Generate waypoints for loop route
     function generateLoopWaypoints(startLat, startLon, distanceMiles) {
       const loopPoints = 3;
-      const radius = distanceMiles / (Math.PI * 1.8);
+      const radius = distanceMiles / (Math.PI * 1.9);
       const waypoints = [];
       const randomAngle = Math.random() * 2 * Math.PI;
 
@@ -319,11 +321,8 @@
 
         waypoints.push([startLon + lonOffset, startLat + latOffset]);
       }
-
       return waypoints;
     }
-
-
 
     // Main function to generate route to match target distance
     async function generateRouteToMatchDistance(startLat, startLon, targetDistanceMiles, routeType, elevationPref) {
@@ -334,9 +333,11 @@
       let routeGeoJSON = null;
       let finalElevationGain = 0;
 
+      // Add tolerance to target distance
       while (routeDifferenceMiles > (targetDistanceMiles * 0.08) && attemptCount < maxAttempts) {
         let routeCoordinates;
 
+        // Generate route coordinates for loop or one-way
         if (routeType === 'loop') {
           const loopWaypoints = generateLoopWaypoints(startLat, startLon, targetDistanceMiles);
           routeCoordinates = [
@@ -352,18 +353,21 @@
           ];
         }
 
+        // Catch ORS API call errors
         try {
           const orsResponse = await callORS(routeCoordinates);
           if (!orsResponse?.features?.length) {
-            console.warn("No route returned. Retrying...");
+            console.warn("No route returned. Retrying.");
             attemptCount++;
             continue;
           }
 
+          // Get route data
           const route = orsResponse.features[0];
           const coordData = route.geometry.coordinates;
           const actualRouteMiles = route.properties.summary.distance / 1609.34;
           const elevationGain = calculateElevation(coordData);
+
           // Store route before checking elevation
           routeGeoJSON = route;
           finalElevationGain = elevationGain;
@@ -378,7 +382,7 @@
             elevationOkay = false;
           }
           if (elevationPref === "2") {
-            // Medium
+            // Normal
             if (elevationGain < (30 * targetDistanceMiles) || elevationGain > (170 * targetDistanceMiles)) {
               elevationOkay = false;
             }
@@ -388,7 +392,7 @@
             elevationOkay = false;
           }
           if (!elevationOkay) {
-            console.log(`Elevation ${elevationGain} ft outside preference. Retrying...`);
+            console.log(`Elevation ${elevationGain} ft outside preference. Retrying.`);
             attemptCount++;
             continue;
           }
@@ -402,7 +406,7 @@
 
         } catch (error) {
           if (error.type === "rateLimit") {
-            console.warn(`Rate limited. Waiting ${error.retryAfter}s...`);
+            console.warn(`Rate limited. Waiting ${error.retryAfter}s`);
             await new Promise(r => setTimeout(r, error.retryAfter * 1000));
           } else {
             console.error("ORS request failed:", error);
@@ -508,6 +512,7 @@
         map.removeSource('mile-markers');
       }
 
+      // Add the markers once calculated
       map.addSource('mile-markers', { type: 'geojson', data: mileMarkers });
       map.addLayer({
         id: 'mile-marker-labels',
@@ -518,7 +523,7 @@
           'text-size': 18,
           'text-padding': 8,
           'text-anchor': 'center',
-          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+          'text-font': ['Arial Unicode MS Bold', 'Open Sans Bold'],
           'text-justify': 'center'
         },
         paint: {
@@ -530,10 +535,11 @@
       });
     }
 
+    // Calculate elevation gain from segments
     function calculateElevation(coordsData) {
       if (!coordsData || coordsData.length < 2) return 0;
-      console.log("Start Elev:", coordsData[0][2]);
-      console.log("End Elev:", coordsData[coordsData.length - 1][2]);
+      console.log("Start Elevation:", coordsData[0][2]);
+      console.log("End Elevation:", coordsData[coordsData.length - 1][2]);
 
       // Take every 3rd point to reduce noise
       const step = 3;
@@ -550,15 +556,13 @@
         if (difference > 0) totalGain += difference;
       }
 
-      // Convert Meters to Feet
+      // Convert meters to feet
       const meterToFeet = 3.28084;
       totalGain *= meterToFeet;
-      return totalGain.toFixed(0); // nearest whole foot
+      return totalGain.toFixed(0);
     }
 
-    // Actual Running of Script
-
-    // Add current location tool
+    // Add current location tool to map
     var currentloc = new mapboxgl.GeolocateControl({
       positionOptions: {
         enableHighAccuracy: true
@@ -569,7 +573,7 @@
     let startMarker = null;
     let endMarker = null;
 
-    // Get current coords and add to form and marker
+    // Get current coords and add to form and marker when pushed
     currentloc.on('geolocate', (event) => {
       var currentLat = event.coords.latitude;
       var currentLon = event.coords.longitude;
@@ -585,12 +589,12 @@
         .addTo(map);
     });
 
-    // Get coords based on click
+    // Get coordinates based on click and add marker
     map.on('click', (event) => {
       var clickcoords = event.lngLat;
       var currentLat = clickcoords.lat;
       var currentLon = clickcoords.lng;
-      console.log(`Clicked Coords: ${currentLat} & ${currentLon}`);
+      console.log(`Clicked Coordinates: ${currentLat} & ${currentLon}`);
       document.getElementById('startlat').value = currentLat;
       document.getElementById('startlon').value = currentLon;
       if (startMarker !== null) {
@@ -613,6 +617,7 @@
     submitButton.addEventListener('click', async () => {
       console.log("Submit Button Clicked")
 
+      // Send alerts if parameters are missing
       if (!document.getElementById('startlat').value || !document.getElementById('startlon').value) {
         alert("Please enter valid latitude and longitude values.");
         return;
@@ -624,6 +629,7 @@
         return;
       }
 
+      // Get variables from form
       const latInput = Number(document.getElementById('startlat').value);
       const lonInput = Number(document.getElementById('startlon').value);
       const targetDistance = parseFloat(document.getElementById('distance').value);
@@ -643,19 +649,21 @@
         .setLngLat([lonInput, latInput])
         .addTo(map);
 
+      // Add Loading text to page
       actualLengthElem.textContent = "Loading...";
       elevChangeElem.textContent = "";
       const result = await generateRouteToMatchDistance(
         latInput, lonInput, targetDistance, routeType, elevationProfile
       );
 
+      // Get route and elevation
       const { routeGeoJSON, elevationGain } = result;
-
       const coordData = routeGeoJSON.geometry.coordinates;
       const endCoords = coordData[coordData.length - 1];
       const routeLength = routeGeoJSON.properties.summary.distance / 1609.34;
       displayRouteOnMap(routeGeoJSON);
-      // Add end waypoint if needed
+      
+      // Add end waypoint if needed for one-way
       if (routeType != 'loop') {
         endMarker = new mapboxgl.Marker({ color: '#D38B5D' })
           .setLngLat([endCoords[0], endCoords[1]])
@@ -664,6 +672,7 @@
       console.log(routeLength);
       console.log(elevationGain);
       routeSimple = routeLength.toFixed(2);
+
       // Change actual route length value
       actualLengthElem.textContent = "Route Length: " + routeSimple + " miles";
       elevChangeElem.textContent = "Elevation Gain: " + elevationGain + " feet";
