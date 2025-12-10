@@ -299,7 +299,6 @@
       // Offsets coordinates
       const deltaLat = (Math.sin(randomAngle) * distanceMiles) / milesPerDegreeLat;
       const deltaLon = (Math.cos(randomAngle) * distanceMiles) / milesPerDegreeLon;
-      console.log("Random Point:", [startLon + deltaLon, startLat + deltaLat])
 
       // Return random point coordinates
       return [startLon + deltaLon, startLat + deltaLat];
@@ -312,11 +311,12 @@
       const waypoints = [];
       const randomAngle = Math.random() * 2 * Math.PI;
 
+      // Generate waypoints with variance
       for (let i = 0; i < loopPoints; i++) {
         const angleNoise = (Math.random() - 0.5) * 0.2;
         const angle = randomAngle + (i * (Math.PI * 1.2 / loopPoints)) + angleNoise;
 
-        const latOffset = (radius / 69) * Math.cos(angle) + (Math.random() - 0.5) * 0.0002; // ~20m shake
+        const latOffset = (radius / 69) * Math.cos(angle) + (Math.random() - 0.5) * 0.0002;
         const lonOffset = (radius / (69 * Math.cos(startLat * Math.PI / 180))) * Math.sin(angle) + (Math.random() - 0.5) * 0.0002;
 
         waypoints.push([startLon + lonOffset, startLat + latOffset]);
@@ -333,7 +333,7 @@
       let routeGeoJSON = null;
       let finalElevationGain = 0;
 
-      // Add tolerance to target distance
+      // Loop process until max attempts or route is found
       while (attemptCount < maxAttempts) {
         let routeCoordinates;
 
@@ -357,7 +357,7 @@
         try {
           const orsResponse = await callORS(routeCoordinates);
           if (!orsResponse?.features?.length) {
-            console.warn("No route returned. Retrying.");
+            console.warn("No ORS route returned. Retrying.");
             attemptCount++;
             continue;
           }
@@ -368,6 +368,7 @@
           const actualRouteMiles = route.properties.summary.distance / 1609.34;
           const elevationGain = calculateElevation(coordData);
 
+          // Calculate route difference
           routeDifferenceMiles = Math.abs(actualRouteMiles - targetDistanceMiles);
           console.log(`Attempt ${attemptCount + 1}: ${actualRouteMiles.toFixed(2)} mi (target ${targetDistanceMiles})`);
 
@@ -393,7 +394,7 @@
 
           // Check if route meets distance and elevation criteria
           if (!distanceOkay) {
-            console.log(`Distance Threshold Not Met: ${routeDifferenceMiles.toFixed(2)} mi. Retrying.`);
+            console.log(`Distance Threshold Not Met: ${actualRouteMiles.toFixed(2)} mi. Retrying.`);
             attemptCount++;
             continue;
           } else if (!elevationOkay) {
@@ -413,6 +414,7 @@
           // Throttle to avoid rate limit
           await new Promise(r => setTimeout(r, 800));
 
+          // If route meets criteria, break loop
           break;
 
         } catch (error) {
@@ -593,6 +595,7 @@
         startMarker.remove();
       }
 
+      // Add marker of current location
       startMarker = new mapboxgl.Marker({ color: '#739E82' })
         .setLngLat([currentLon, currentLat])
         .addTo(map);
@@ -609,6 +612,7 @@
       if (startMarker !== null) {
         startMarker.remove();
       }
+      // Add marker where clicked
       startMarker = new mapboxgl.Marker({ color: '#739E82' })
         .setLngLat([currentLon, currentLat])
         .addTo(map);
@@ -619,7 +623,7 @@
       })
     });
 
-    // Get calculate button
+    // Get submit button
     const submitButton = document.getElementById('submit');
 
     // Action after submit button
