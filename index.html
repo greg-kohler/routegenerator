@@ -389,6 +389,10 @@
             elevationOkay = false;
           }
 
+          // Store route
+          routeGeoJSON = route;
+          finalElevationGain = elevationGain;
+          
           // Calculate if distance matches
           const distanceOkay = routeDifferenceMiles <= (targetDistanceMiles * 0.08);
 
@@ -402,10 +406,6 @@
             attemptCount++;
             continue;
           }
-
-          // Store route
-          routeGeoJSON = route;
-          finalElevationGain = elevationGain;
 
           // Adjust estimatedMiles for next attempt
           estimatedMiles *= targetDistanceMiles / actualRouteMiles;
