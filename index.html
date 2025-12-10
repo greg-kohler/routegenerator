@@ -334,7 +334,7 @@
       let finalElevationGain = 0;
 
       // Add tolerance to target distance
-      while (routeDifferenceMiles > (targetDistanceMiles * 0.08) && attemptCount < maxAttempts) {
+      while (attemptCount < maxAttempts) {
         let routeCoordinates;
 
         // Generate route coordinates for loop or one-way
@@ -368,10 +368,6 @@
           const actualRouteMiles = route.properties.summary.distance / 1609.34;
           const elevationGain = calculateElevation(coordData);
 
-          // Store route before checking elevation
-          routeGeoJSON = route;
-          finalElevationGain = elevationGain;
-
           routeDifferenceMiles = Math.abs(actualRouteMiles - targetDistanceMiles);
           console.log(`Attempt ${attemptCount + 1}: ${actualRouteMiles.toFixed(2)} mi (target ${targetDistanceMiles})`);
 
@@ -391,11 +387,24 @@
             // Hilly
             elevationOkay = false;
           }
-          if (!elevationOkay) {
-            console.log(`Elevation ${elevationGain} ft outside preference. Retrying.`);
+
+          // Calculate if distance matches
+          const distanceOkay = routeDifferenceMiles <= (targetDistanceMiles * 0.08);
+
+          // Check if route meets distance and elevation criteria
+          if (!distanceOkay) {
+            console.log(`Distance Threshold Not Met: ${routeDifferenceMiles.toFixed(2)} mi. Retrying.`);
+            attemptCount++;
+            continue;
+          } else if (!elevationOkay) {
+            console.log(`Elevation Threshold Not Met: ${elevationGain} ft. Retrying.`);
             attemptCount++;
             continue;
           }
+
+          // Store route
+          routeGeoJSON = route;
+          finalElevationGain = elevationGain;
 
           // Adjust estimatedMiles for next attempt
           estimatedMiles *= targetDistanceMiles / actualRouteMiles;
@@ -538,8 +547,6 @@
     // Calculate elevation gain from segments
     function calculateElevation(coordsData) {
       if (!coordsData || coordsData.length < 2) return 0;
-      console.log("Start Elevation:", coordsData[0][2]);
-      console.log("End Elevation:", coordsData[coordsData.length - 1][2]);
 
       // Take every 3rd point to reduce noise
       const step = 3;
@@ -577,7 +584,7 @@
     currentloc.on('geolocate', (event) => {
       var currentLat = event.coords.latitude;
       var currentLon = event.coords.longitude;
-      console.log(`Geolocate Coords: ${currentLat} & ${currentLon}`);
+      console.log(`Geolocated Coordinates: ${currentLat} & ${currentLon}`);
       document.getElementById('startlat').value = currentLat;
       document.getElementById('startlon').value = currentLon;
       if (startMarker !== null) {
@@ -662,15 +669,15 @@
       const endCoords = coordData[coordData.length - 1];
       const routeLength = routeGeoJSON.properties.summary.distance / 1609.34;
       displayRouteOnMap(routeGeoJSON);
-      
+
       // Add end waypoint if needed for one-way
       if (routeType != 'loop') {
         endMarker = new mapboxgl.Marker({ color: '#D38B5D' })
           .setLngLat([endCoords[0], endCoords[1]])
           .addTo(map);
       }
-      console.log(routeLength);
-      console.log(elevationGain);
+      console.log(`Route Length: ${routeLength.toFixed(2)} miles`);
+      console.log(`Elevation Gain: ${elevationGain} feet`);
       routeSimple = routeLength.toFixed(2);
 
       // Change actual route length value
@@ -694,4 +701,5 @@
 
   </script>
 </body>
+
 </html>
