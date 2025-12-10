@@ -413,6 +413,8 @@
           // Throttle to avoid rate limit
           await new Promise(r => setTimeout(r, 800));
 
+          break;
+
         } catch (error) {
           if (error.type === "rateLimit") {
             console.warn(`Rate limited. Waiting ${error.retryAfter}s`);
